@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
-import { INITIAL_REQUESTS, type EquipmentRequest } from "@/lib/data";
+import { type EquipmentRequest } from "@/lib/data";
+import { loadRequests, saveRequests, loadNextReqNum, saveNextReqNum, resetStorage } from "@/lib/storage";
 import FieldView from "@/components/FieldView";
 import EquipServicesView from "@/components/EquipServicesView";
 
@@ -11,8 +12,19 @@ export default function Home() {
   const bp = useBreakpoint();
   const isMobile = bp === "mobile";
   const [view, setView] = useState<"field" | "equip">("field");
-  const [requests, setRequests] = useState<EquipmentRequest[]>(INITIAL_REQUESTS);
-  const [nextReqNum, setNextReqNum] = useState(8);
+  const [requests, setRequests] = useState<EquipmentRequest[]>(() => loadRequests());
+  const [nextReqNum, setNextReqNum] = useState(() => loadNextReqNum());
+
+  // Persist requests to localStorage on every change
+  useEffect(() => { saveRequests(requests); }, [requests]);
+
+  // Expose reset for demo/dev console: window.__resetHaul()
+  useEffect(() => {
+    (window as unknown as Record<string, unknown>).__resetHaul = () => {
+      resetStorage();
+      window.location.reload();
+    };
+  }, []);
 
   const addRequest = (req: Omit<EquipmentRequest, "id" | "status" | "submittedAt">) => {
     const id = `REQ-${String(nextReqNum).padStart(3, "0")}`;
@@ -20,7 +32,10 @@ export default function Home() {
       { ...req, id, status: "Pending" as const, submittedAt: new Date().toISOString() },
       ...prev,
     ]);
-    setNextReqNum((n) => n + 1);
+    setNextReqNum((n) => {
+      saveNextReqNum(n + 1);
+      return n + 1;
+    });
     return id;
   };
 
