@@ -1,4 +1,4 @@
-﻿# HAUL — Heavy Asset Utilization & Logistics
+# HAUL — Heavy Asset Utilization & Logistics
 
 ## Hackathon MVP Plan
 
@@ -237,6 +237,7 @@ These features bridge the gap between the hackathon demo and the first real fiel
 | **~~Upcoming Maintenance Table~~** | **Done.** 5-row table with equipment photo/name, type, due date. Yellow highlight for items due within 3 days, gray for overdue. `UPCOMING_MAINTENANCE` in `data.ts`. (SPEC-016) | Matches pitch deck Slide 8. |
 | **~~Availability Calendar (30-Day Bar)~~** | **Done.** 30-day horizontal bar on Asset Detail: green (available), navy (committed), yellow (pending), dark-yellow (maintenance). Built from request dates + asset status. Hover tooltips. Legend. `requests` prop threaded from FieldView. (SPEC-017) | Matches pitch deck Slide 11 Phase 1. |
 | **~~Add New Equipment~~** | **Done.** "+ Add Equipment" form on Equipment Services Fleet tab. Assets lifted from static `ASSETS` const into React state with localStorage persistence (mirroring requests pattern). 2-column responsive form: name, type, make, model, year, yard, status, ready date, rate, cert required, photo dropdown, dynamic specs key/value builder. Submit Green (`#00A200`) button. New assets appear immediately in Fleet Overview, Field View catalog, and KPI calculations. `CERT_TYPES` added to `data.ts`. `storage.ts` extended with `loadAssets`/`saveAssets`. `assets` prop threaded through `FieldView`, `EquipServicesView`, `FleetOverview`. `window.__resetHaul()` clears back to 23 seed assets. (SPEC-018) | Demonstrates ES fleet management ownership — coordinators can register new acquisitions without developer intervention. Strengthens the "single platform" narrative in the demo. |
+| ~~**Cost Savings Ticker**~~ | **Done.** "ESOP Value Protected This Quarter" banner on Equipment Services Dashboard. Calculates savings from fulfilled requests: `days * rate * (1.8 - 1)` where 1.8x is external rental markup. Navy gradient, large dollar figure (28/36px responsive), request count subtitle, SVG dollar icon (hidden on mobile). Hidden when zero fulfilled requests. Number grows live as ES accepts requests during demo — starting ~$35,720 with seed data. `useMemo` in `EquipServicesView.tsx`. (SPEC-019) | Directly supports ESOP narrative — judges see the dollar impact of using internal equipment vs. external rental. The number growing live during demo is a powerful storytelling moment. |
 
 ---
 
