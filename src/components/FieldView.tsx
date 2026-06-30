@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
-import { CATEGORIES, CATEGORY_CARDS, MOCK_USER, type EquipmentRequest, type Asset } from "@/lib/data";
+import { CATEGORY_CARDS, MOCK_USER, type EquipmentRequest, type Asset } from "@/lib/data";
 import { getLocation } from "@/lib/helpers";
 import { StatusBadge, Btn, SectionLabel, cardStyle, inputStyle } from "@/components/ui";
 import AssetDetail from "@/components/AssetDetail";
@@ -33,6 +33,7 @@ export default function FieldView({ assets, requests, addRequest }: FieldViewPro
   const [confirmReqId, setConfirmReqId] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
   const [locationFilter, setLocationFilter] = useState<string | null>(null);
+  const [showAllCategories, setShowAllCategories] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Hydrate on client-side only to avoid time-based mismatches
@@ -163,19 +164,28 @@ export default function FieldView({ assets, requests, addRequest }: FieldViewPro
       <div className="category-browser">
         <div className="category-browser-header">
           <SectionLabel>Browse by Category</SectionLabel>
-          <button onClick={() => setCategory("All")} className="category-browser-view-all">
-            View all
+          <button
+            onClick={() => {
+              if (showAllCategories) {
+                setShowAllCategories(false);
+              } else {
+                setShowAllCategories(true);
+                setCategory("All");
+              }
+            }}
+            className="category-browser-view-all"
+          >
+            {showAllCategories ? "Show less" : "View all"}
           </button>
         </div>
-        <div className="horizontal-scroller" style={{ display: "flex", gap: isMobile ? 10 : 12, paddingBottom: 8 }}>
-          {CATEGORY_CARDS.map((cat) => (
+        <div className="category-grid">
+          {(showAllCategories ? CATEGORY_CARDS : CATEGORY_CARDS.slice(0, isMobile ? 4 : isTablet ? 5 : 8)).map((cat) => (
             <button
               key={cat.type}
               onClick={() => setCategory(category === cat.type ? "All" : cat.type)}
               className={`category-card ${category === cat.type ? 'category-card--selected' : ''}`}
-              style={{ width: isMobile ? 90 : 110 }}
             >
-              <img alt={cat.label} src={cat.image} style={{ width: "100%", height: isMobile ? 60 : 70, objectFit: "cover" }} />
+              <img alt={cat.label} src={cat.image} className="category-card-img" />
               <div className="category-card-label">{cat.label}</div>
             </button>
           ))}
@@ -276,18 +286,6 @@ export default function FieldView({ assets, requests, addRequest }: FieldViewPro
             />
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 2, flex: isMobile ? 1 : undefined }}>
-              <span style={{ fontSize: 10, fontWeight: 600, color: S.darkGray, textTransform: "uppercase" as const, letterSpacing: 0.5 }}>Type</span>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                style={{ ...inputStyle, width: "auto", minWidth: isMobile ? 0 : 140, minHeight: 44 }}
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
-            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 2, flex: isMobile ? 1 : undefined }}>
               <span style={{ fontSize: 10, fontWeight: 600, color: S.darkGray, textTransform: "uppercase" as const, letterSpacing: 0.5 }}>Status</span>
               <select
