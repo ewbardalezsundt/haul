@@ -8,6 +8,30 @@ import { JOB_SITES, ATTACHMENTS, OPERATORS, type Asset, type EquipmentRequest } 
 import { getCompatibleAttachments, getOperatorCertStatus, getTransitEstimate } from "@/lib/helpers";
 import { Btn, BackBtn, InfoRow, cardStyle, inputStyle, labelStyle } from "@/components/ui";
 
+/* ── Site-hour options (30-min increments, construction-typical range) ── */
+function formatTime(h: number, m: number): { value: string; label: string } {
+  const value = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  const period = h < 12 ? "AM" : "PM";
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  const label = `${h12}:${String(m).padStart(2, "0")} ${period}`;
+  return { value, label };
+}
+const SITE_HOUR_OPTIONS: { value: string; label: string }[] = [];
+for (let h = 4; h <= 20; h++) {
+  SITE_HOUR_OPTIONS.push(formatTime(h, 0));
+  if (h < 20) SITE_HOUR_OPTIONS.push(formatTime(h, 30));
+}
+
+function formatSiteHours(start: string, end: string): string {
+  const fmt = (v: string) => {
+    const [hh, mm] = v.split(":").map(Number);
+    const period = hh < 12 ? "AM" : "PM";
+    const h12 = hh === 0 ? 12 : hh > 12 ? hh - 12 : hh;
+    return `${h12}:${String(mm).padStart(2, "0")} ${period}`;
+  };
+  return `${fmt(start)} – ${fmt(end)}`;
+}
+
 interface OrderWizardProps {
   asset: Asset;
   onCancel: () => void;
@@ -31,7 +55,8 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
     deliveryContact: "",
     deliveryNotes: "",
     deliveryDropZone: "",
-    siteHours: "",
+    siteHoursStart: "06:00",
+    siteHoursEnd: "16:30",
     unloadingSupport: false,
   });
 
@@ -57,7 +82,7 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
       deliveryContact: form.deliveryContact || undefined,
       deliveryNotes: form.deliveryNotes || undefined,
       deliveryDropZone: form.deliveryDropZone || undefined,
-      siteHours: form.siteHours || undefined,
+      siteHours: (form.siteHoursStart && form.siteHoursEnd) ? formatSiteHours(form.siteHoursStart, form.siteHoursEnd) : undefined,
       unloadingSupport: form.unloadingSupport || undefined,
     });
   };
@@ -231,13 +256,38 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
                   </div>
                   <div>
                     <label style={labelStyle}>Site Hours</label>
-                    <input
-                      type="text"
-                      placeholder="e.g., 6:00 AM – 4:30 PM"
-                      value={form.siteHours}
-                      onChange={(e) => setForm({ ...form, siteHours: e.target.value })}
-                      style={inputStyle}
-                    />
+                    <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr auto 1fr", gap: isMobile ? 8 : 10, alignItems: "center" }}>
+                      <div>
+                        <label style={{ ...labelStyle, fontSize: 11, color: S.black70, marginBottom: 3 }}>Open</label>
+                        <select
+                          value={form.siteHoursStart}
+                          onChange={(e) => setForm({ ...form, siteHoursStart: e.target.value })}
+                          style={inputStyle}
+                        >
+                          {SITE_HOUR_OPTIONS.map((t) => (
+                            <option key={`s-${t.value}`} value={t.value}>{t.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {!isMobile && (
+                        <span style={{ fontSize: 13, fontWeight: 600, color: S.black70, paddingTop: 18 }}>to</span>
+                      )}
+                      <div>
+                        <label style={{ ...labelStyle, fontSize: 11, color: S.black70, marginBottom: 3 }}>Close</label>
+                        <select
+                          value={form.siteHoursEnd}
+                          onChange={(e) => setForm({ ...form, siteHoursEnd: e.target.value })}
+                          style={inputStyle}
+                        >
+                          {SITE_HOUR_OPTIONS.map((t) => (
+                            <option key={`e-${t.value}`} value={t.value}>{t.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    {form.siteHoursStart && form.siteHoursEnd && form.siteHoursStart >= form.siteHoursEnd && (
+                      <p style={{ fontSize: 11, marginTop: 4, color: S.black70 }}>⚠ End time should be after start time</p>
+                    )}
                   </div>
                   <div>
                     <label style={labelStyle}>Drop Zone</label>
@@ -466,13 +516,13 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
                     </div>
                   );
                 })()}
-                {(form.deliveryAddress || form.deliveryContact || form.deliveryNotes || form.deliveryDropZone || form.siteHours || form.unloadingSupport) && (
+                {(form.deliveryAddress || form.deliveryContact || form.deliveryNotes || form.deliveryDropZone || form.siteHoursStart || form.unloadingSupport) && (
                   <>
                     <div style={{ borderTop: `1px solid ${S.qdrGray}`, marginTop: 12, paddingTop: 12 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: S.black70, marginBottom: 8 }}>📦 Delivery Details</div>
                       {form.deliveryAddress && <InfoRow label="Address" value={form.deliveryAddress} />}
                       {form.deliveryContact && <InfoRow label="Contact" value={form.deliveryContact} />}
-                      {form.siteHours && <InfoRow label="Site Hours" value={form.siteHours} />}
+                      {form.siteHoursStart && form.siteHoursEnd && <InfoRow label="Site Hours" value={formatSiteHours(form.siteHoursStart, form.siteHoursEnd)} />}
                       {form.deliveryDropZone && <InfoRow label="Drop Zone" value={form.deliveryDropZone} />}
                       {form.deliveryNotes && <InfoRow label="Access/Gate Notes" value={form.deliveryNotes} />}
                       {form.unloadingSupport && <InfoRow label="Unloading Support" value="Yes — help needed" />}
