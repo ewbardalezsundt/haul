@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
-import { type EquipmentRequest } from "@/lib/data";
+import { ASSETS, type EquipmentRequest } from "@/lib/data";
 import { loadRequests, saveRequests, loadNextReqNum, saveNextReqNum, resetStorage } from "@/lib/storage";
 import FieldView from "@/components/FieldView";
 import EquipServicesView from "@/components/EquipServicesView";
@@ -14,6 +14,32 @@ export default function Home() {
   const [view, setView] = useState<"field" | "equip">("field");
   const [requests, setRequests] = useState<EquipmentRequest[]>(() => loadRequests());
   const [nextReqNum, setNextReqNum] = useState(() => loadNextReqNum());
+  const [notifications, setNotifications] = useState<string[]>([]);
+  const prevRequestsRef = useRef<EquipmentRequest[]>(requests);
+
+  // Auto-dismiss toasts after 5 seconds
+  useEffect(() => {
+    if (notifications.length === 0) return;
+    const t = setTimeout(() => setNotifications([]), 5000);
+    return () => clearTimeout(t);
+  }, [notifications]);
+
+  const switchToField = useCallback(() => {
+    const prev = prevRequestsRef.current;
+    const msgs: string[] = [];
+    for (const req of requests) {
+      const old = prev.find((r) => r.id === req.id);
+      if (old && old.status !== req.status) {
+        const asset = ASSETS.find((a) => a.id === req.assetId)?.name ?? req.assetId;
+        if (req.status === "Accepted") msgs.push(`\u2705 ${req.id} accepted \u2014 ${asset}`);
+        else if (req.status === "Declined") msgs.push(`${req.id} declined \u2014 ${asset}`);
+        else if (req.status === "In Transit") msgs.push(`\ud83d\ude9b ${req.id} \u2014 ${asset} is in transit`);
+      }
+    }
+    if (msgs.length > 0) setNotifications(msgs);
+    prevRequestsRef.current = [...requests];
+    setView("field");
+  }, [requests]);
 
   // Persist requests to localStorage on every change
   useEffect(() => { saveRequests(requests); }, [requests]);
@@ -105,7 +131,7 @@ export default function Home() {
               label={isMobile ? "Field" : "Field View"}
               icon="🚛"
               active={view === "field"}
-              onClick={() => setView("field")}
+              onClick={switchToField}
               compact={isMobile}
             />
             <NavBtn
@@ -127,6 +153,41 @@ export default function Home() {
           <EquipServicesView requests={requests} updateRequestStatus={updateRequestStatus} />
         )}
       </main>
+
+      {/* Toast notifications */}
+      {notifications.map((msg, i) => (
+        <div
+          key={i}
+          style={{
+            position: "fixed",
+            bottom: (isMobile ? 12 : 16) + i * 64,
+            right: isMobile ? 12 : 16,
+            left: isMobile ? 12 : "auto",
+            backgroundColor: S.white,
+            borderLeft: `4px solid ${S.navy}`,
+            borderRadius: 8,
+            padding: "12px 16px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+            zIndex: 200,
+            maxWidth: 360,
+            fontSize: 13,
+            fontWeight: 500,
+            color: S.black90,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <span>{msg}</span>
+          <button
+            onClick={() => setNotifications((n) => n.filter((_, j) => j !== i))}
+            style={{ background: "none", border: "none", cursor: "pointer", color: S.darkGray, fontSize: 16, flexShrink: 0 }}
+          >
+            ×
+          </button>
+        </div>
+      ))}
     </div>
   );
 }
