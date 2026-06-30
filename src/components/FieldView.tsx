@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
 import { ASSETS, CATEGORIES, MOCK_USER, type EquipmentRequest } from "@/lib/data";
@@ -10,6 +11,8 @@ import AssetDetail from "@/components/AssetDetail";
 import OrderWizard from "@/components/OrderWizard";
 import OrderConfirmation from "@/components/OrderConfirmation";
 import MyRequests from "@/components/MyRequests";
+
+const AssetMap = dynamic(() => import("@/components/AssetMap"), { ssr: false });
 
 interface FieldViewProps {
   requests: EquipmentRequest[];
@@ -27,15 +30,18 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
   const [orderAsset, setOrderAsset] = useState<typeof ASSETS[number] | null>(null);
   const [showRequests, setShowRequests] = useState(false);
   const [confirmReqId, setConfirmReqId] = useState<string | null>(null);
+  const [showMap, setShowMap] = useState(false);
+  const [locationFilter, setLocationFilter] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     return ASSETS.filter((a) => {
       if (category !== "All" && a.type !== category) return false;
       if (statusFilter !== "All" && a.status !== statusFilter) return false;
+      if (locationFilter && a.location !== locationFilter) return false;
       if (search && !`${a.name} ${a.make} ${a.model} ${a.type}`.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [search, category, statusFilter]);
+  }, [search, category, statusFilter, locationFilter]);
 
   if (confirmReqId) {
     return (
@@ -102,7 +108,13 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
             What equipment do you need today?
           </p>
         </div>
-        <Btn variant="secondary" onClick={() => setShowRequests(true)}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {!isMobile && (
+            <Btn variant="secondary" onClick={() => setShowMap(!showMap)}>
+              {showMap ? "🔲 Grid" : "📍 Map"}
+            </Btn>
+          )}
+          <Btn variant="secondary" onClick={() => setShowRequests(true)}>
           📋 My Requests
           <span
             style={{
@@ -118,7 +130,24 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
             {requests.filter((r) => r.requestedBy === "Tom Bradley").length}
           </span>
         </Btn>
+        </div>
       </div>
+
+      {/* Map (tablet + desktop) */}
+      {showMap && !isMobile && (
+        <div style={{ marginBottom: 20 }}>
+          <AssetMap
+            onYardClick={(yardId) => {
+              setLocationFilter(yardId);
+              setShowMap(false);
+            }}
+            onJobSiteClick={(jobId) => {
+              setLocationFilter(jobId);
+              setShowMap(false);
+            }}
+          />
+        </div>
+      )}
 
       {/* Filters */}
       <div style={{ ...cardStyle, padding: isMobile ? 12 : 16, marginBottom: 20 }}>
@@ -173,6 +202,42 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
           </div>
         </div>
       </div>
+
+      {/* Active location filter */}
+      {locationFilter && (
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            backgroundColor: "#E3F0F7",
+            border: `1px solid ${S.navy}`,
+            borderRadius: 20,
+            padding: "6px 14px",
+            marginBottom: 12,
+            fontSize: 13,
+            fontWeight: 600,
+            color: S.navy,
+          }}
+        >
+          📍 Showing: {getLocation(locationFilter)}
+          <button
+            onClick={() => setLocationFilter(null)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 14,
+              color: S.navy,
+              padding: "0 2px",
+              lineHeight: 1,
+            }}
+            aria-label="Clear location filter"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       <p style={{ fontSize: 13, color: S.darkGray, marginBottom: 14 }}>
         {filtered.length} asset{filtered.length !== 1 ? "s" : ""} found
