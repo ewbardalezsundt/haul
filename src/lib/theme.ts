@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // SUNDT BRAND TOKENS
 // ═══════════════════════════════════════════════════════════
 // ⚠️  Red (#EE373D) = brand energy. NEVER error/danger/rejected.
@@ -44,6 +44,7 @@ export const statusBadgeColors: Record<string, { color: string; bg: string }> = 
   Accepted: { color: S.darkGreen, bg: "#E8F5E9" },
   Declined: { color: S.black70, bg: S.black5 }, // NOT red
   "In Transit": { color: S.navy, bg: "#E3F0F7" },
+  Delivered: { color: S.darkGreen, bg: "#E8F5E9" },
 };
 
 export const certColors: Record<string, string> = {

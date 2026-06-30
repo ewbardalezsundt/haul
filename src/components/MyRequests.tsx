@@ -24,6 +24,7 @@ function getStepIndex(status: string): number {
     case "Pending": return 1;    // Under Review
     case "Accepted": return 2;   // Approved
     case "In Transit": return 3; // In Transit
+    case "Delivered": return 4;  // Delivered (final)
     default: return 0;           // Submitted (fallback)
   }
 }

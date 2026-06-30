@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { S } from "@/lib/theme";
@@ -85,6 +85,7 @@ export default function Home() {
     if (status === "Accepted") msg = `\u2705 ${reqId} accepted \u2014 ${assetName}`;
     else if (status === "Declined") msg = `${reqId} declined \u2014 ${assetName}`;
     else if (status === "In Transit") msg = `\ud83d\ude9b ${reqId} \u2014 ${assetName} is in transit`;
+    else if (status === "Delivered") msg = `\ud83d\udce6 ${reqId} \u2014 ${assetName} delivered to site`;
     if (msg) setNotifications((prev) => [...prev, msg]);
 
     setRequests((prev) =>

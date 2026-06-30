@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo } from "react";
 import { S } from "@/lib/theme";
@@ -94,20 +94,20 @@ export default function EquipServicesView({
 
   const pending = requests.filter((r) => r.status === "Pending");
   const active = requests.filter((r) => ["Accepted", "In Transit"].includes(r.status));
-  const closed = requests.filter((r) => r.status === "Declined");
+  const closed = requests.filter((r) => ["Declined", "Delivered"].includes(r.status));
 
   // --- Richer KPIs (SPEC-014) ---
   const total = assets.length;
   const deployed = assets.filter((a) => a.status === "Deployed").length;
   const utilization = Math.round((deployed / total) * 100);
   const totalRequests = requests.length;
-  const fulfilled = requests.filter((r) => ["Accepted", "In Transit"].includes(r.status)).length;
+  const fulfilled = requests.filter((r) => ["Accepted", "In Transit", "Delivered"].includes(r.status)).length;
   const fillRate = totalRequests > 0 ? Math.round((fulfilled / totalRequests) * 100) : 0;
 
   // --- Cost Savings (SPEC-019) ---
   const EXTERNAL_MARKUP = 1.8;
   const savingsData = useMemo(() => {
-    const fulfilledReqs = requests.filter(r => ["Accepted", "In Transit"].includes(r.status));
+    const fulfilledReqs = requests.filter(r => ["Accepted", "In Transit", "Delivered"].includes(r.status));
     let totalSavings = 0;
     for (const req of fulfilledReqs) {
       const asset = assets.find(a => a.id === req.assetId);
@@ -714,7 +714,7 @@ export default function EquipServicesView({
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {active.length === 0 && <Empty msg="No active requests" />}
           {active.map((req) => (
-            <RequestCard key={req.id} req={req} />
+            <RequestCard key={req.id} req={req} onMarkInTransit={() => updateRequestStatus(req.id, "In Transit")} onMarkDelivered={() => updateRequestStatus(req.id, "Delivered")} />
           ))}
         </div>
       )}

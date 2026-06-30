@@ -11,9 +11,11 @@ interface RequestCardProps {
   req: EquipmentRequest;
   onAccept?: () => void;
   onDecline?: () => void;
+  onMarkInTransit?: () => void;
+  onMarkDelivered?: () => void;
 }
 
-export default function RequestCard({ req, onAccept, onDecline }: RequestCardProps) {
+export default function RequestCard({ req, onAccept, onDecline, onMarkInTransit, onMarkDelivered }: RequestCardProps) {
   const [showDeliveryDetails, setShowDeliveryDetails] = useState(false);
   const isMobile = useBreakpoint() === "mobile";
   const asset = ASSETS.find((a) => a.id === req.assetId);
@@ -229,6 +231,32 @@ export default function RequestCard({ req, onAccept, onDecline }: RequestCardPro
               style={{ padding: "8px 16px", fontSize: 12, color: S.black70, ...(isMobile ? { flex: 1 } : {}) }}
             >
               Decline
+            </Btn>
+          </div>
+        )}
+
+        {/* Fulfillment: Mark In Transit */}
+        {req.status === "Accepted" && onMarkInTransit && (
+          <div style={{ display: "flex", flexDirection: isMobile ? "row" : "column", gap: 6, flexShrink: 0, ...(isMobile ? { width: "100%", marginTop: 12 } : {}) }}>
+            <Btn
+              variant="primary"
+              onClick={onMarkInTransit}
+              style={{ padding: "8px 16px", fontSize: 12, ...(isMobile ? { flex: 1 } : {}) }}
+            >
+              Mark In Transit
+            </Btn>
+          </div>
+        )}
+
+        {/* Fulfillment: Mark Delivered */}
+        {req.status === "In Transit" && onMarkDelivered && (
+          <div style={{ display: "flex", flexDirection: isMobile ? "row" : "column", gap: 6, flexShrink: 0, ...(isMobile ? { width: "100%", marginTop: 12 } : {}) }}>
+            <Btn
+              variant="submit"
+              onClick={onMarkDelivered}
+              style={{ padding: "8px 16px", fontSize: 12, ...(isMobile ? { flex: 1 } : {}) }}
+            >
+              Mark Delivered
             </Btn>
           </div>
         )}
