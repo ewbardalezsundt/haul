@@ -31,7 +31,7 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
   const filtered = useMemo(() => {
     return ASSETS.filter((a) => {
       if (category !== "All" && a.type !== category) return false;
-      if (statusFilter === "Available" && a.status !== "Available") return false;
+      if (statusFilter !== "All" && a.status !== statusFilter) return false;
       if (search && !`${a.name} ${a.make} ${a.model} ${a.type}`.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
@@ -122,7 +122,7 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
 
       {/* Filters */}
       <div style={{ ...cardStyle, padding: isMobile ? 12 : 16, marginBottom: 20 }}>
-        <div style={{ display: "flex", gap: isMobile ? 8 : 12, flexWrap: "wrap", flexDirection: isMobile ? "column" : "row" }}>
+        <div style={{ display: "flex", gap: isMobile ? 8 : 12, flexWrap: "wrap", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? undefined : "flex-end" }}>
           <div style={{ flex: isMobile ? undefined : 1, minWidth: isMobile ? undefined : 200, position: "relative" }}>
             <span
               style={{
@@ -144,24 +144,32 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
               style={{ ...inputStyle, paddingLeft: 36, minHeight: 44 }}
             />
           </div>
-          <div style={{ display: "flex", gap: 8, ...(isMobile ? {} : {}) }}>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              style={{ ...inputStyle, width: "auto", minWidth: isMobile ? 0 : 140, flex: isMobile ? 1 : undefined, minHeight: 44 }}
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c}>{c}</option>
-              ))}
-            </select>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              style={{ ...inputStyle, width: "auto", minWidth: isMobile ? 0 : 120, flex: isMobile ? 1 : undefined, minHeight: 44 }}
-            >
-              <option>All</option>
-              <option>Available</option>
-            </select>
+          <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2, flex: isMobile ? 1 : undefined }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: S.darkGray, textTransform: "uppercase" as const, letterSpacing: 0.5 }}>Type</span>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                style={{ ...inputStyle, width: "auto", minWidth: isMobile ? 0 : 140, minHeight: 44 }}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2, flex: isMobile ? 1 : undefined }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: S.darkGray, textTransform: "uppercase" as const, letterSpacing: 0.5 }}>Status</span>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                style={{ ...inputStyle, width: "auto", minWidth: isMobile ? 0 : 120, minHeight: 44 }}
+              >
+                <option>All</option>
+                <option>Available</option>
+                <option>Deployed</option>
+                <option>In Maintenance</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
