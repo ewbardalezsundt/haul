@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
 import { OPERATORS, DECLINE_REASONS, UPCOMING_MAINTENANCE, YARDS, CATEGORIES, CERT_TYPES, type EquipmentRequest, type Asset } from "@/lib/data";
@@ -103,6 +103,22 @@ export default function EquipServicesView({
   const totalRequests = requests.length;
   const fulfilled = requests.filter((r) => ["Accepted", "In Transit"].includes(r.status)).length;
   const fillRate = totalRequests > 0 ? Math.round((fulfilled / totalRequests) * 100) : 0;
+
+  // --- Cost Savings (SPEC-019) ---
+  const EXTERNAL_MARKUP = 1.8;
+  const savingsData = useMemo(() => {
+    const fulfilledReqs = requests.filter(r => ["Accepted", "In Transit"].includes(r.status));
+    let totalSavings = 0;
+    for (const req of fulfilledReqs) {
+      const asset = assets.find(a => a.id === req.assetId);
+      if (!asset) continue;
+      const start = new Date(req.startDate);
+      const end = new Date(req.endDate);
+      const days = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+      totalSavings += asset.rate * (EXTERNAL_MARKUP - 1) * days;
+    }
+    return { totalSavings, count: fulfilledReqs.length };
+  }, [requests, assets]);
 
   // Mock trend data — hardcoded per hackathon rules (no historical data)
   const stats: { label: string; value: string | number; sub: string; accent: string; trend?: string }[] = [
@@ -213,6 +229,42 @@ export default function EquipServicesView({
           </div>
         ))}
       </div>
+
+      {/* Cost Savings Banner (SPEC-019) */}
+      {savingsData.count > 0 && (
+        <div style={{
+          background: `linear-gradient(135deg, ${S.navy}, ${S.darkNavy})`,
+          borderRadius: 12,
+          padding: isMobile ? "16px 20px" : "20px 28px",
+          marginBottom: 24,
+          color: S.white,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          flexWrap: "wrap",
+        }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85, marginBottom: 4 }}>
+              ESOP Value Protected This Quarter
+            </div>
+            <div style={{ fontSize: isMobile ? 28 : 36, fontWeight: 800 }}>
+              ${savingsData.totalSavings.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+            </div>
+            <div style={{ fontSize: 12, opacity: 0.75, marginTop: 4 }}>
+              saved across {savingsData.count} fulfilled request{savingsData.count !== 1 ? "s" : ""} vs. external rental
+            </div>
+          </div>
+          {!isMobile && (
+            <div style={{ opacity: 0.3 }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Certification Compliance (SPEC-015) */}
       <div
