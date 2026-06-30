@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
-import { ASSETS, DECLINE_REASONS, type EquipmentRequest } from "@/lib/data";
+import { ASSETS, OPERATORS, DECLINE_REASONS, type EquipmentRequest } from "@/lib/data";
 import { Btn, cardStyle, inputStyle } from "@/components/ui";
 import RequestCard from "@/components/RequestCard";
 import FleetOverview from "@/components/FleetOverview";
@@ -93,6 +93,18 @@ export default function EquipServicesView({
     { label: "Total Fleet", value: total, sub: "Total Assets", accent: S.black80 },
   ];
 
+  // --- Certification Compliance (SPEC-015) ---
+  const demoDate = new Date(DEMO_TODAY + "T00:00:00");
+  const compliant = OPERATORS.filter((o) => o.status === "Current").length;
+  const expired = OPERATORS.filter((o) => o.status === "Expired").length;
+  const expiringSoon = OPERATORS.filter((o) => {
+    if (o.status !== "Current") return false;
+    const daysToExpiry = (new Date(o.expiry).getTime() - demoDate.getTime()) / 86400000;
+    return daysToExpiry <= 30;
+  }).length;
+  const fullyCompliant = compliant - expiringSoon;
+  const complianceRate = Math.round((compliant / OPERATORS.length) * 100);
+
   return (
     <div>
       <h1 style={{ fontSize: 22, fontWeight: 700, color: S.black90, marginBottom: 20 }}>
@@ -141,6 +153,76 @@ export default function EquipServicesView({
             )}
           </div>
         ))}
+      </div>
+
+      {/* Certification Compliance (SPEC-015) */}
+      <div
+        style={{
+          ...cardStyle,
+          display: "flex",
+          alignItems: isMobile ? "flex-start" : "center",
+          flexDirection: isMobile ? "column" : "row",
+          gap: isMobile ? 16 : 28,
+          padding: isMobile ? 16 : 20,
+          marginBottom: 24,
+        }}
+      >
+        {/* Donut */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
+          <div
+            style={{
+              width: 90,
+              height: 90,
+              borderRadius: "50%",
+              background: `conic-gradient(
+                ${S.green} 0% ${(fullyCompliant / OPERATORS.length) * 100}%,
+                #D4A017 ${(fullyCompliant / OPERATORS.length) * 100}% ${((fullyCompliant + expiringSoon) / OPERATORS.length) * 100}%,
+                ${S.black70} ${((fullyCompliant + expiringSoon) / OPERATORS.length) * 100}% 100%
+              )`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                width: 62,
+                height: 62,
+                borderRadius: "50%",
+                backgroundColor: S.white,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 20,
+                fontWeight: 800,
+                color: S.black90,
+              }}
+            >
+              {complianceRate}%
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: S.black90 }}>Certification Compliance</div>
+            <div style={{ fontSize: 11, color: S.black70, marginTop: 2 }}>{OPERATORS.length} Operators</div>
+          </div>
+        </div>
+
+        {/* Legend */}
+        <div style={{ display: "flex", gap: isMobile ? 16 : 24 }}>
+          {[
+            { color: S.green, label: "Compliant", count: fullyCompliant },
+            { color: "#D4A017", label: "Expiring Soon", count: expiringSoon },
+            { color: S.black70, label: "Expired", count: expired },
+          ].map((item) => (
+            <div key={item.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: item.color, flexShrink: 0 }} />
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: S.black90 }}>{item.count}</div>
+                <div style={{ fontSize: 10, color: S.black70, whiteSpace: "nowrap" }}>{item.label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Tabs */}

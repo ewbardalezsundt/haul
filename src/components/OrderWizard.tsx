@@ -27,6 +27,7 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
     fuelFreq: "Weekly",
     operatorId: "",
     operatorRequested: false,
+    deliveryAddress: "",
     deliveryContact: "",
     deliveryNotes: "",
     deliveryDropZone: "",
@@ -36,7 +37,7 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
 
   const compatible = getCompatibleAttachments(asset.type);
   const totalSteps = 4;
-  const canNext = step === 1 ? form.jobSiteId && form.startDate && form.endDate : true;
+  const canNext = step === 1 ? form.jobSiteId && form.startDate && form.endDate && form.deliveryAddress : true;
   const steps = ["Job & Dates", "Attachments", "Services", "Review"];
   const mobileSteps = ["Job", "Attach", "Service", "Review"];
 
@@ -52,6 +53,7 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
       fuelFreq: form.fueling ? form.fuelFreq : null,
       operatorId: form.operatorId || null,
       operatorRequested: form.operatorRequested,
+      deliveryAddress: form.deliveryAddress || undefined,
       deliveryContact: form.deliveryContact || undefined,
       deliveryNotes: form.deliveryNotes || undefined,
       deliveryDropZone: form.deliveryDropZone || undefined,
@@ -202,8 +204,21 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
                 })()}
               </div>
               <div style={{ borderTop: `1px solid ${S.qdrGray}`, paddingTop: 16, marginTop: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: S.darkGray, marginBottom: 12 }}>Delivery Details (optional)</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: S.darkGray, marginBottom: 12 }}>Delivery Details</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div>
+                    <label style={labelStyle}>Delivery Address *</label>
+                    <input
+                      type="text"
+                      placeholder="Street address or cross-streets for delivery"
+                      value={form.deliveryAddress}
+                      onChange={(e) => setForm({ ...form, deliveryAddress: e.target.value })}
+                      style={inputStyle}
+                    />
+                    {!form.deliveryAddress && form.jobSiteId && (
+                      <p style={{ fontSize: 11, marginTop: 4, color: S.black70 }}>Required</p>
+                    )}
+                  </div>
                   <div>
                     <label style={labelStyle}>Delivery Contact</label>
                     <input
@@ -451,10 +466,11 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
                     </div>
                   );
                 })()}
-                {(form.deliveryContact || form.deliveryNotes || form.deliveryDropZone || form.siteHours || form.unloadingSupport) && (
+                {(form.deliveryAddress || form.deliveryContact || form.deliveryNotes || form.deliveryDropZone || form.siteHours || form.unloadingSupport) && (
                   <>
                     <div style={{ borderTop: `1px solid ${S.qdrGray}`, marginTop: 12, paddingTop: 12 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: S.black70, marginBottom: 8 }}>📦 Delivery Details</div>
+                      {form.deliveryAddress && <InfoRow label="Address" value={form.deliveryAddress} />}
                       {form.deliveryContact && <InfoRow label="Contact" value={form.deliveryContact} />}
                       {form.siteHours && <InfoRow label="Site Hours" value={form.siteHours} />}
                       {form.deliveryDropZone && <InfoRow label="Drop Zone" value={form.deliveryDropZone} />}

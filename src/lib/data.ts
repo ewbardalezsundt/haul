@@ -65,6 +65,7 @@ export interface EquipmentRequest {
   submittedAt: string;
   declineReason?: string;
   declineReasonCode?: string;
+  deliveryAddress?: string;
   deliveryContact?: string;
   deliveryNotes?: string;
   deliveryDropZone?: string;
@@ -119,7 +120,7 @@ export const ATTACHMENTS: Attachment[] = [
 
 export const OPERATORS: Operator[] = [
   { id: "op-1", name: "Mike Rodriguez", certifications: ["Excavator", "Loader"], status: "Current", expiry: "2027-03-15" },
-  { id: "op-2", name: "Sarah Chen", certifications: ["Crane", "Excavator"], status: "Current", expiry: "2026-08-20" },
+  { id: "op-2", name: "Sarah Chen", certifications: ["Crane", "Excavator"], status: "Current", expiry: "2026-07-18" },  // Expiring soon — within 30 days of demo date
   { id: "op-3", name: "James Walker", certifications: ["Skid Steer"], status: "Expired", expiry: "2026-01-10" },
   { id: "op-4", name: "David Martinez", certifications: ["Dozer", "Loader", "Excavator"], status: "Current", expiry: "2026-11-01" },
   { id: "op-5", name: "Lisa Thompson", certifications: ["Generator", "Crane"], status: "Current", expiry: "2027-06-30" },
