@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
 import { ASSETS, INITIAL_REQUESTS, type EquipmentRequest, type Asset } from "@/lib/data";
@@ -18,7 +18,6 @@ export default function Home() {
   const [nextAssetNum, setNextAssetNum] = useState(ASSETS.length + 1);
   const [isHydrated, setIsHydrated] = useState(false);
   const [notifications, setNotifications] = useState<string[]>([]);
-  const prevRequestsRef = useRef<EquipmentRequest[]>(requests);
 
   // Hydrate from localStorage after client-side mount
   useEffect(() => {
@@ -41,21 +40,8 @@ export default function Home() {
   }, [notifications]);
 
   const switchToField = useCallback(() => {
-    const prev = prevRequestsRef.current;
-    const msgs: string[] = [];
-    for (const req of requests) {
-      const old = prev.find((r) => r.id === req.id);
-      if (old && old.status !== req.status) {
-        const asset = assets.find((a) => a.id === req.assetId)?.name ?? req.assetId;
-        if (req.status === "Accepted") msgs.push(`\u2705 ${req.id} accepted \u2014 ${asset}`);
-        else if (req.status === "Declined") msgs.push(`${req.id} declined \u2014 ${asset}`);
-        else if (req.status === "In Transit") msgs.push(`\ud83d\ude9b ${req.id} \u2014 ${asset} is in transit`);
-      }
-    }
-    if (msgs.length > 0) setNotifications(msgs);
-    prevRequestsRef.current = [...requests];
     setView("field");
-  }, [requests, assets]);
+  }, []);
 
   // Persist requests & assets to localStorage on every change
   useEffect(() => { saveRequests(requests); }, [requests]);
@@ -93,6 +79,14 @@ export default function Home() {
   }, [nextAssetNum]);
 
   const updateRequestStatus = (reqId: string, status: string, reason?: string, reasonCode?: string) => {
+    const req = requests.find((r) => r.id === reqId);
+    const assetName = req ? (assets.find((a) => a.id === req.assetId)?.name ?? req.assetId) : reqId;
+    let msg = "";
+    if (status === "Accepted") msg = `\u2705 ${reqId} accepted \u2014 ${assetName}`;
+    else if (status === "Declined") msg = `${reqId} declined \u2014 ${assetName}`;
+    else if (status === "In Transit") msg = `\ud83d\ude9b ${reqId} \u2014 ${assetName} is in transit`;
+    if (msg) setNotifications((prev) => [...prev, msg]);
+
     setRequests((prev) =>
       prev.map((r) =>
         r.id === reqId

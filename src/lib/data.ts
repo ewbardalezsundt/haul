@@ -200,9 +200,16 @@ export const CATEGORY_CARDS: { type: string; label: string; image: string }[] = 
   { type: "Loader", label: "Loaders", image: "/images/equipment/cat-950m-loader.jpg" },
   { type: "Crane", label: "Cranes", image: "/images/equipment/liebherr-ltm1060-crane.jpg" },
   { type: "Dozer", label: "Dozers", image: "/images/equipment/cat-d6-dozer.jpg" },
-  { type: "Boom Lift", label: "Boom Lifts", image: "/images/equipment/jlg-600s-boomlift.jpg" },
   { type: "Generator", label: "Generators", image: "/images/equipment/cat-xq200-generator.jpg" },
+  { type: "Telehandler", label: "Telehandlers", image: "/images/equipment/jlg-1055-telehandler.jpg" },
   { type: "Compactor", label: "Compaction", image: "/images/equipment/cat-cs56b-compactor.jpg" },
+  { type: "Light Tower", label: "Light Towers", image: "/images/equipment/wacker-ltn6l-lighttower.jpg" },
+  { type: "Backhoe", label: "Backhoes", image: "/images/equipment/cat-420-backhoe.jpg" },
+  { type: "Boom Lift", label: "Boom Lifts", image: "/images/equipment/jlg-600s-boomlift.jpg" },
+  { type: "Reach Fork", label: "Reach Forks", image: "/images/equipment/cat-th357d-reachfork.jpg" },
+  { type: "Trench Plate", label: "Trench Plates", image: "/images/equipment/roadplate-trenchplate.jpg" },
+  { type: "Camera", label: "Cameras", image: "/images/equipment/sensera-mc30-camera.jpg" },
+  { type: "Specialty Tool", label: "Specialty Tools", image: "/images/equipment/hilti-te70-rotaryhammer.jpg" },
 ];
 
 // ── Upcoming Maintenance Schedule (SPEC-016) ────────────
