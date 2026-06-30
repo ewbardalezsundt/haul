@@ -30,7 +30,7 @@ src/
 │   └── useBreakpoint.ts      ← Responsive hook: mobile/tablet/desktop
 └── components/
     ├── ui.tsx                ← Shared: Btn, StatusBadge, BackBtn, SectionLabel, InfoRow, CertIndicator
-    ├── FieldView.tsx         ← Asset catalog grid with search/filter
+    ├── FieldView.tsx         ← Asset catalog grid with search/filter (labeled Type & Status dropdowns, 4 status options)
     ├── AssetDetail.tsx       ← Full spec page, availability, compatible attachments
     ├── OrderWizard.tsx       ← 4-step guided request (Job & Dates → Attachments → Services → Review)
     ├── OrderConfirmation.tsx ← Success screen with request ID
@@ -184,7 +184,7 @@ HAUL builds on an original Equipment Services pitch (`ESD_Spark_Idea_2.pptx`) wi
 - [ ] **Active Requests on Home Screen (P0)** — Show 1-2 active requests on the catalog page with status badges. "View all" links to My Requests. ~30 min. Matches pitch deck Slide 6. (SPEC-013)
 - [ ] **Richer KPIs (P0)** — Internal Fill Rate %, Equipment Utilization %, Active Requests, Total Fleet. Mock trend arrows. ~30 min. Matches pitch deck Slide 8. (SPEC-014)
 - [x] ~~**Structured Decline Reasons (P1)**~~ **Done.** — Dropdown with 6 reason codes (Maintenance, Unavailable Date, Cert Issue, Transport Constraint, Better Substitute, Other) added to decline modal. Decline button disabled until a code is selected. Free-text notes still available. History tab shows bold reason label + optional notes. Seed REQ-004 updated with structured code. (SPEC-004)
-- [ ] **Request Operator Service (P1)** — Add "Sundt-provided operator requested" toggle to the Services step of the Order Wizard, alongside fueling. Follows the same UI pattern. Especially realistic for cranes and excavators.
+- [x] ~~**Request Operator Service (P1)**~~ **Done.** — "Sundt-provided operator requested" checkbox added to Order Wizard Step 3 (Services) alongside fueling. `operatorRequested?: boolean` on `EquipmentRequest` interface. Step 4 review shows "Operator Service: Yes — Sundt-provided" when checked. RequestCard displays green 👷 badge. Toggle is independent from operator selection dropdown in Step 1. (SPEC-005)
 - [ ] **Delivery Details (P1)** — Add optional fields to the Order Wizard: delivery contact, gate/access notes, drop zone, site hours, unloading support needed. Reduces follow-up phone calls.
 - [ ] **Dispatch Queue Grouping (P1)** — Add "Today / This Week / Future" date-based grouping headers to the Equipment Services request queue. Sort within each group by start date.
 - [ ] **Certification Compliance (P1)** — Donut/gauge showing operator cert compliance % with Compliant / Expiring Soon / Expired counts. CSS donut, mock data. Matches pitch deck Slide 8. (SPEC-015)
@@ -216,7 +216,7 @@ HAUL is a field-use app — supervisors and foremen will access it from phones a
 - [ ] **Estimated Delivery / Transit Time** — Show estimated arrival time on each asset based on yard-to-jobsite distance. Hardcode transit estimates for the 4 yards × 5 job sites matrix (20 combinations). Display as "Est. arrival: ~2 hours from Tucson Yard" on asset detail and order review screens.
 - [ ] **Delivery Details in Order Wizard** — Add optional delivery fields: contact name/phone, gate/access notes, preferred drop zone, site hours, unloading support needed. Reduces follow-up phone calls significantly.
 - [x] ~~**Structured Decline / Delay Reasons**~~ **Done.** — 6-code dropdown (Maintenance, Unavailable Date, Cert Issue, Transport Constraint, Better Substitute, Other) + optional notes. `DECLINE_REASONS` in `data.ts`, `declineReasonCode` on `EquipmentRequest`. History shows bold label + notes. (SPEC-004)
-- [ ] **Request Operator Service Option** — Add "Sundt-provided operator requested" toggle to the Services step of the Order Wizard alongside fueling. Relevant for cranes, excavators, and specialty assets.
+- [x] ~~**Request Operator Service Option**~~ **Done.** — Toggle in Order Wizard Step 3 alongside fueling. `operatorRequested` field on `EquipmentRequest`. Badge on RequestCard. (SPEC-005)
 - [ ] **Dispatch-Oriented Queue Grouping** — Add "Today / This Week / Future" grouping headers to Equipment Services request queue. Sort within each group by requested start date.
 
 ### Post-MVP (deferred features documented in HAUL_MVP_Plan.md)
@@ -253,4 +253,4 @@ HAUL is a field-use app — supervisors and foremen will access it from phones a
 
 ---
 
-*Last updated: June 30, 2026. SPEC-004 (structured decline reasons) implemented — dropdown with 6 reason codes in decline modal. SPEC-003 (localStorage persistence) implemented — demo survives browser refresh. SPEC-001 (responsive layout) and SPEC-011 (personalized greeting) previously completed. Pitch deck reviewed — 7 new features identified and specced (SPEC-011–017). All features use mock data per hackathon rules (no auth).*
+*Last updated: June 30, 2026. SPEC-005 (request operator service) implemented — toggle in Order Wizard Step 3, review row in Step 4, badge on RequestCard. Catalog filter UX improved: dropdown labels (TYPE / STATUS) added, status filter expanded to All/Available/Deployed/In Maintenance. SPEC-004 (structured decline reasons) implemented — dropdown with 6 reason codes in decline modal. SPEC-003 (localStorage persistence) implemented — demo survives browser refresh. SPEC-001 (responsive layout) and SPEC-011 (personalized greeting) previously completed. Pitch deck reviewed — 7 new features identified and specced (SPEC-011–017). All features use mock data per hackathon rules (no auth).*
