@@ -36,6 +36,8 @@ function getAvailabilityTimeline(asset: Asset, requests: EquipmentRequest[]): Ti
     let status: TimelineBlock["status"] = "available";
     if (asset.status === "In Maintenance" && asset.readyDate > ds) {
       status = "maintenance";
+    } else if (asset.status === "Deployed" && asset.readyDate > ds) {
+      status = "committed";
     } else if (hit) {
       status = hit.status === "Pending" ? "pending" : "committed";
     }
