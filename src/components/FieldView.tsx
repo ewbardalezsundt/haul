@@ -54,6 +54,12 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
     });
   }, [search, category, statusFilter, locationFilter]);
 
+  const activeRequests = useMemo(() => {
+    return requests
+      .filter((r) => ["Pending", "Accepted", "In Transit"].includes(r.status))
+      .slice(0, 2);
+  }, [requests]);
+
   if (confirmReqId) {
     return (
       <OrderConfirmation
@@ -225,6 +231,59 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
         </div>
         </div>
       </div>
+
+      {/* Your Active Requests */}
+      {activeRequests.length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <SectionLabel>Your Active Requests</SectionLabel>
+            <button
+              onClick={() => setShowRequests(true)}
+              style={{
+                fontSize: 12,
+                color: S.navy,
+                border: "none",
+                background: "none",
+                cursor: "pointer",
+                fontWeight: 600,
+                padding: 0,
+                marginBottom: 6,
+              }}
+            >
+              View all
+            </button>
+          </div>
+          {activeRequests.map((req) => {
+            const asset = ASSETS.find((a) => a.id === req.assetId);
+            return (
+              <div
+                key={req.id}
+                style={{
+                  ...cardStyle,
+                  padding: "12px 16px",
+                  marginBottom: 6,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                }}
+              >
+                <img
+                  src={asset?.photo}
+                  alt=""
+                  style={{ width: 40, height: 30, objectFit: "cover", borderRadius: 4, flexShrink: 0 }}
+                />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: S.black90 }}>{asset?.name}</div>
+                  <div style={{ fontSize: 11, color: S.black70 }}>
+                    {req.id} · {req.startDate}
+                  </div>
+                </div>
+                <StatusBadge status={req.status} />
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Map (tablet + desktop) */}
       {showMap && !isMobile && (
