@@ -1,6 +1,7 @@
 "use client";
 
 import { S } from "@/lib/theme";
+import { useBreakpoint } from "@/lib/useBreakpoint";
 import { Btn, cardStyle } from "@/components/ui";
 
 interface OrderConfirmationProps {
@@ -9,9 +10,10 @@ interface OrderConfirmationProps {
 }
 
 export default function OrderConfirmation({ reqId, onDone }: OrderConfirmationProps) {
+  const isMobile = useBreakpoint() === "mobile";
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "80px 20px" }}>
-      <div style={{ ...cardStyle, padding: 40, textAlign: "center", maxWidth: 420, width: "100%" }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: isMobile ? "40px 16px" : "80px 20px" }}>
+      <div style={{ ...cardStyle, padding: isMobile ? 24 : 40, textAlign: "center", maxWidth: isMobile ? "100%" : 420, width: "100%" }}>
         <div
           style={{
             width: 56,
@@ -48,7 +50,7 @@ export default function OrderConfirmation({ reqId, onDone }: OrderConfirmationPr
           </p>
         </div>
         <p style={{ fontSize: 11, color: S.darkGray, marginTop: 12 }}>Status: Pending Approval</p>
-        <Btn variant="primary" onClick={onDone} style={{ marginTop: 20 }}>
+        <Btn variant="primary" onClick={onDone} style={{ marginTop: 20, width: isMobile ? "100%" : undefined }}>
           View My Requests
         </Btn>
       </div>

@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { S } from "@/lib/theme";
-import { ASSETS, CATEGORIES, type EquipmentRequest } from "@/lib/data";
+import { useBreakpoint } from "@/lib/useBreakpoint";
+import { ASSETS, CATEGORIES, MOCK_USER, type EquipmentRequest } from "@/lib/data";
 import { getLocation } from "@/lib/helpers";
 import { StatusBadge, Btn, cardStyle, inputStyle } from "@/components/ui";
 import AssetDetail from "@/components/AssetDetail";
@@ -16,6 +17,9 @@ interface FieldViewProps {
 }
 
 export default function FieldView({ requests, addRequest }: FieldViewProps) {
+  const bp = useBreakpoint();
+  const isMobile = bp === "mobile";
+  const isTablet = bp === "tablet";
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -91,10 +95,10 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
       >
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: S.black90, margin: 0 }}>
-            Equipment Catalog
+            {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}, {MOCK_USER.name}
           </h1>
           <p style={{ fontSize: 13, color: S.black70, marginTop: 4 }}>
-            Browse, compare, and request Sundt-owned assets
+            What equipment do you need today?
           </p>
         </div>
         <Btn variant="secondary" onClick={() => setShowRequests(true)}>
@@ -116,9 +120,9 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
       </div>
 
       {/* Filters */}
-      <div style={{ ...cardStyle, padding: 16, marginBottom: 20 }}>
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          <div style={{ flex: 1, minWidth: 200, position: "relative" }}>
+      <div style={{ ...cardStyle, padding: isMobile ? 12 : 16, marginBottom: 20 }}>
+        <div style={{ display: "flex", gap: isMobile ? 8 : 12, flexWrap: "wrap", flexDirection: isMobile ? "column" : "row" }}>
+          <div style={{ flex: isMobile ? undefined : 1, minWidth: isMobile ? undefined : 200, position: "relative" }}>
             <span
               style={{
                 position: "absolute",
@@ -136,26 +140,28 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
               placeholder="Search by name, make, model..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ ...inputStyle, paddingLeft: 36 }}
+              style={{ ...inputStyle, paddingLeft: 36, minHeight: 44 }}
             />
           </div>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            style={{ ...inputStyle, width: "auto", minWidth: 140 }}
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            style={{ ...inputStyle, width: "auto", minWidth: 120 }}
-          >
-            <option>All</option>
-            <option>Available</option>
-          </select>
+          <div style={{ display: "flex", gap: 8, ...(isMobile ? {} : {}) }}>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              style={{ ...inputStyle, width: "auto", minWidth: isMobile ? 0 : 140, flex: isMobile ? 1 : undefined, minHeight: 44 }}
+            >
+              {CATEGORIES.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              style={{ ...inputStyle, width: "auto", minWidth: isMobile ? 0 : 120, flex: isMobile ? 1 : undefined, minHeight: 44 }}
+            >
+              <option>All</option>
+              <option>Available</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -167,8 +173,8 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-          gap: 14,
+          gridTemplateColumns: isMobile ? "1fr" : isTablet ? "repeat(auto-fill, minmax(260px, 1fr))" : "repeat(auto-fill, minmax(300px, 1fr))",
+          gap: isMobile ? 10 : 14,
         }}
       >
         {filtered.map((asset) => (
@@ -178,9 +184,10 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
             style={{
               ...cardStyle,
               textAlign: "left" as const,
-              padding: 20,
+              padding: 0,
               cursor: "pointer",
               transition: "all 0.15s",
+              overflow: "hidden",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = S.navy;
@@ -191,17 +198,13 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
               e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)";
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                marginBottom: 10,
-              }}
-            >
-              <span style={{ fontSize: 30 }}>{asset.photo}</span>
-              <StatusBadge status={asset.status} />
+            <div style={{ position: "relative" }}>
+              <img src={asset.photo} alt={asset.name} style={{ width: "100%", height: isMobile ? 140 : 160, objectFit: "cover", display: "block" }} />
+              <div style={{ position: "absolute", top: 8, right: 8 }}>
+                <StatusBadge status={asset.status} />
+              </div>
             </div>
+            <div style={{ padding: isMobile ? "12px 16px 16px" : "14px 20px 20px" }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: S.black90 }}>{asset.name}</div>
             <div style={{ fontSize: 12, color: S.black70, marginTop: 3 }}>
               {asset.make} · {asset.model} · {asset.year}
@@ -223,6 +226,7 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
                 ${asset.rate.toLocaleString()}
                 <span style={{ fontSize: 11, fontWeight: 400, color: S.darkGray }}>/wk</span>
               </span>
+            </div>
             </div>
           </button>
         ))}

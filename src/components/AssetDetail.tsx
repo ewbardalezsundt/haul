@@ -1,6 +1,7 @@
 "use client";
 
 import { S } from "@/lib/theme";
+import { useBreakpoint } from "@/lib/useBreakpoint";
 import type { Asset } from "@/lib/data";
 import { getLocation, getCompatibleAttachments } from "@/lib/helpers";
 import { StatusBadge, Btn, BackBtn, SectionLabel, InfoRow, cardStyle } from "@/components/ui";
@@ -12,6 +13,8 @@ interface AssetDetailProps {
 }
 
 export default function AssetDetail({ asset, onBack, onRequest }: AssetDetailProps) {
+  const bp = useBreakpoint();
+  const isMobile = bp === "mobile";
   const compatible = getCompatibleAttachments(asset.type);
 
   return (
@@ -22,13 +25,13 @@ export default function AssetDetail({ asset, onBack, onRequest }: AssetDetailPro
         <div
           style={{
             backgroundColor: S.black90,
-            padding: "32px 32px",
+            padding: isMobile ? "20px 20px" : "32px 32px",
             borderRadius: "10px 10px 0 0",
             borderTop: `4px solid ${S.red}`,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-            <span style={{ fontSize: 56 }}>{asset.photo}</span>
+          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "center", gap: isMobile ? 16 : 20 }}>
+            <img src={asset.photo} alt={asset.name} style={isMobile ? { width: "100%", height: 180, objectFit: "cover", borderRadius: 8 } : { width: 120, height: 90, objectFit: "cover", borderRadius: 8, flexShrink: 0 }} />
             <div>
               <h1 style={{ fontSize: 22, fontWeight: 700, color: S.white, margin: 0 }}>
                 {asset.name}
@@ -46,8 +49,8 @@ export default function AssetDetail({ asset, onBack, onRequest }: AssetDetailPro
           </div>
         </div>
 
-        <div style={{ padding: 32 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
+        <div style={{ padding: isMobile ? 20 : 32 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? 24 : 32 }}>
             {/* Specs */}
             <div>
               <SectionLabel>Specifications</SectionLabel>
@@ -115,7 +118,7 @@ export default function AssetDetail({ asset, onBack, onRequest }: AssetDetailPro
             }}
           >
             {asset.status === "Available" ? (
-              <Btn variant="brand" onClick={onRequest} style={{ padding: "12px 28px", fontSize: 14 }}>
+              <Btn variant="brand" onClick={onRequest} style={{ padding: "12px 28px", fontSize: 14, width: isMobile ? "100%" : undefined, minHeight: 48 }}>
                 Request This Equipment →
               </Btn>
             ) : (

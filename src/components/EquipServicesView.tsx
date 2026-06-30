@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { S } from "@/lib/theme";
+import { useBreakpoint } from "@/lib/useBreakpoint";
 import { ASSETS, type EquipmentRequest } from "@/lib/data";
 import { Btn, cardStyle, inputStyle } from "@/components/ui";
 import RequestCard from "@/components/RequestCard";
@@ -19,6 +20,9 @@ export default function EquipServicesView({
   const [tab, setTab] = useState("queue");
   const [declineReqId, setDeclineReqId] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState("");
+  const bp = useBreakpoint();
+  const isMobile = bp === "mobile";
+  const isTablet = bp === "tablet";
 
   const pending = requests.filter((r) => r.status === "Pending");
   const active = requests.filter((r) => ["Accepted", "In Transit"].includes(r.status));
@@ -42,15 +46,20 @@ export default function EquipServicesView({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
+          gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : isTablet ? "repeat(3, 1fr)" : "repeat(5, 1fr)",
           gap: 10,
           marginBottom: 24,
         }}
       >
-        {stats.map((s) => (
+        {stats.map((s, idx) => (
           <div
             key={s.label}
-            style={{ ...cardStyle, borderTop: `3px solid ${s.accent}`, padding: 16 }}
+            style={{
+              ...cardStyle,
+              borderTop: `3px solid ${s.accent}`,
+              padding: isMobile ? 12 : 16,
+              ...(isMobile && idx === stats.length - 1 ? { gridColumn: "1 / -1" } : {}),
+            }}
           >
             <div
               style={{
@@ -63,7 +72,7 @@ export default function EquipServicesView({
             >
               {s.label}
             </div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: S.black90, marginTop: 4 }}>
+            <div style={{ fontSize: isMobile ? 20 : 28, fontWeight: 800, color: S.black90, marginTop: 4 }}>
               {s.value}
             </div>
           </div>
@@ -79,12 +88,14 @@ export default function EquipServicesView({
           borderRadius: 8,
           padding: 3,
           marginBottom: 20,
-          width: "fit-content",
+          width: isMobile ? "100%" : "fit-content",
+          overflowX: isMobile ? "auto" : undefined,
+          WebkitOverflowScrolling: "touch" as never,
         }}
       >
         {[
-          { key: "queue", label: `Request Queue (${pending.length})` },
-          { key: "fleet", label: "Fleet Overview" },
+          { key: "queue", label: isMobile ? `Queue (${pending.length})` : `Request Queue (${pending.length})` },
+          { key: "fleet", label: "Fleet" },
           { key: "active", label: `Active (${active.length})` },
           { key: "history", label: "History" },
         ].map((t) => (
@@ -92,13 +103,16 @@ export default function EquipServicesView({
             key={t.key}
             onClick={() => setTab(t.key)}
             style={{
-              padding: "8px 16px",
+              padding: isMobile ? "8px 10px" : "8px 16px",
               borderRadius: 6,
               border: "none",
               cursor: "pointer",
               fontSize: 12,
               fontWeight: 600,
               transition: "all 0.15s",
+              whiteSpace: "nowrap",
+              minHeight: 44,
+              flex: isMobile ? 1 : undefined,
               backgroundColor: tab === t.key ? S.white : "transparent",
               color: tab === t.key ? S.black90 : S.black70,
               boxShadow: tab === t.key ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
@@ -123,7 +137,7 @@ export default function EquipServicesView({
             padding: 16,
           }}
         >
-          <div style={{ ...cardStyle, maxWidth: 440, width: "100%", padding: 24 }}>
+          <div style={{ ...cardStyle, maxWidth: isMobile ? "calc(100vw - 32px)" : 440, width: "100%", padding: isMobile ? 20 : 24 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, color: S.black90, margin: "0 0 12px" }}>
               Decline Request {declineReqId}
             </h3>
@@ -134,13 +148,14 @@ export default function EquipServicesView({
               rows={3}
               style={{ ...inputStyle, resize: "vertical" as const }}
             />
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16 }}>
+            <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: isMobile ? undefined : "flex-end", gap: 8, marginTop: 16 }}>
               <Btn
                 variant="secondary"
                 onClick={() => {
                   setDeclineReqId(null);
                   setDeclineReason("");
                 }}
+                style={isMobile ? { width: "100%", order: 2 } : undefined}
               >
                 Cancel
               </Btn>
@@ -151,6 +166,7 @@ export default function EquipServicesView({
                   setDeclineReqId(null);
                   setDeclineReason("");
                 }}
+                style={isMobile ? { width: "100%", order: 1 } : undefined}
               >
                 Decline
               </Btn>

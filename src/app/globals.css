@@ -47,6 +47,19 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Responsive main padding */
+@media (max-width: 640px) {
+  main {
+    padding: 16px !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  main {
+    padding: 20px !important;
+  }
+}
+
 /* Selection color */
 ::selection {
   background-color: #E3F0F7;

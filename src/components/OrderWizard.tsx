@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { S } from "@/lib/theme";
 import { certColors } from "@/lib/theme";
+import { useBreakpoint } from "@/lib/useBreakpoint";
 import { JOB_SITES, ATTACHMENTS, OPERATORS, type Asset, type EquipmentRequest } from "@/lib/data";
 import { getCompatibleAttachments, getOperatorCertStatus } from "@/lib/helpers";
 import { Btn, BackBtn, InfoRow, cardStyle, inputStyle, labelStyle } from "@/components/ui";
@@ -14,6 +15,8 @@ interface OrderWizardProps {
 }
 
 export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardProps) {
+  const bp = useBreakpoint();
+  const isMobile = bp === "mobile";
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     jobSiteId: "",
@@ -29,6 +32,7 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
   const totalSteps = 4;
   const canNext = step === 1 ? form.jobSiteId && form.startDate && form.endDate : true;
   const steps = ["Job & Dates", "Attachments", "Services", "Review"];
+  const mobileSteps = ["Job", "Attach", "Service", "Review"];
 
   const handleSubmit = () => {
     onSubmit({
@@ -52,15 +56,20 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
         <div
           style={{
             backgroundColor: S.black90,
-            padding: "20px 24px",
+            padding: isMobile ? "16px 20px" : "20px 24px",
             borderRadius: "10px 10px 0 0",
             borderTop: `4px solid ${S.red}`,
             display: "flex",
-            alignItems: "center",
-            gap: 16,
+            flexDirection: isMobile ? "column" : "row",
+            alignItems: isMobile ? "stretch" : "center",
+            gap: isMobile ? 12 : 16,
           }}
         >
-          <span style={{ fontSize: 36 }}>{asset.photo}</span>
+          {isMobile ? (
+            <img src={asset.photo} alt={asset.name} style={{ width: "100%", height: 120, objectFit: "cover", borderRadius: 6 }} />
+          ) : (
+            <img src={asset.photo} alt={asset.name} style={{ width: 56, height: 42, objectFit: "cover", borderRadius: 6, flexShrink: 0 }} />
+          )}
           <div>
             <h2 style={{ fontSize: 17, fontWeight: 700, color: S.white, margin: 0 }}>
               Request: {asset.name}
@@ -73,18 +82,18 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
 
         {/* Step indicator */}
         <div style={{ padding: "20px 24px 0" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 4 : 8 }}>
             {steps.map((label, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}>
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: isMobile ? 4 : 8, flex: 1 }}>
                 <div
                   style={{
-                    width: 30,
-                    height: 30,
+                    width: isMobile ? 24 : 30,
+                    height: isMobile ? 24 : 30,
                     borderRadius: 15,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: 12,
+                    fontSize: isMobile ? 10 : 12,
                     fontWeight: 700,
                     flexShrink: 0,
                     backgroundColor:
@@ -96,12 +105,12 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
                 </div>
                 <span
                   style={{
-                    fontSize: 11,
+                    fontSize: isMobile ? 10 : 11,
                     fontWeight: 500,
                     color: i + 1 === step ? S.black90 : S.darkGray,
                   }}
                 >
-                  {label}
+                  {isMobile ? mobileSteps[i] : label}
                 </span>
                 {i < steps.length - 1 && (
                   <div
@@ -137,7 +146,7 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
                   ))}
                 </select>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12 }}>
                 <div>
                   <label style={labelStyle}>Start Date *</label>
                   <input
@@ -334,21 +343,23 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
           <div
             style={{
               display: "flex",
+              flexDirection: isMobile ? "column-reverse" : "row",
               justifyContent: "space-between",
+              gap: isMobile ? 8 : 0,
               marginTop: 24,
               paddingTop: 20,
               borderTop: `1px solid ${S.qdrGray}`,
             }}
           >
-            <Btn variant="secondary" onClick={() => (step === 1 ? onCancel() : setStep(step - 1))}>
+            <Btn variant="secondary" onClick={() => (step === 1 ? onCancel() : setStep(step - 1))} style={isMobile ? { width: "100%" } : undefined}>
               {step === 1 ? "Cancel" : "← Back"}
             </Btn>
             {step < totalSteps ? (
-              <Btn variant="primary" disabled={!canNext} onClick={() => setStep(step + 1)}>
+              <Btn variant="primary" disabled={!canNext} onClick={() => setStep(step + 1)} style={isMobile ? { width: "100%" } : undefined}>
                 Next →
               </Btn>
             ) : (
-              <Btn variant="submit" onClick={handleSubmit}>
+              <Btn variant="submit" onClick={handleSubmit} style={isMobile ? { width: "100%" } : undefined}>
                 Submit Request
               </Btn>
             )}

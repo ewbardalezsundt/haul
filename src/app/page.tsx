@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import { S } from "@/lib/theme";
+import { useBreakpoint } from "@/lib/useBreakpoint";
 import { INITIAL_REQUESTS, type EquipmentRequest } from "@/lib/data";
 import FieldView from "@/components/FieldView";
 import EquipServicesView from "@/components/EquipServicesView";
 
 export default function Home() {
+  const bp = useBreakpoint();
+  const isMobile = bp === "mobile";
   const [view, setView] = useState<"field" | "equip">("field");
   const [requests, setRequests] = useState<EquipmentRequest[]>(INITIAL_REQUESTS);
   const [nextReqNum, setNextReqNum] = useState(8);
@@ -40,66 +43,62 @@ export default function Home() {
         color: S.black90,
       }}
     >
-      {/* ─── Header with Sundt red brand stripe ─── */}
+      {/* ─── Header with Sundt navy bg + red brand stripe ─── */}
       <header
         style={{
-          backgroundColor: S.white,
+          backgroundColor: S.navy,
           borderBottom: `3px solid ${S.red}`,
           position: "sticky",
           top: 0,
           zIndex: 50,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
         }}
       >
         <div
           style={{
             maxWidth: 1200,
             margin: "0 auto",
-            padding: "0 24px",
+            padding: isMobile ? "0 16px" : "0 24px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             height: 60,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div
+          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 12 }}>
+            <img
+              src="/images/sundt-logo.png"
+              alt="Sundt"
               style={{
-                width: 34,
-                height: 34,
-                borderRadius: 4,
-                backgroundColor: S.red,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: S.white,
-                fontWeight: 800,
-                fontSize: 17,
+                height: isMobile ? 28 : 34,
+                width: "auto",
               }}
-            >
-              H
-            </div>
+            />
             <div>
-              <span style={{ fontSize: 17, fontWeight: 700, color: S.black90 }}>HAUL</span>
-              <span
-                style={{ fontSize: 11, color: S.black70, marginLeft: 8, fontWeight: 500 }}
-              >
-                Heavy Asset Utilization & Logistics
-              </span>
+              <span style={{ fontSize: isMobile ? 15 : 17, fontWeight: 700, color: S.white }}>HAUL</span>
+              {!isMobile && (
+                <span
+                  style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", marginLeft: 8, fontWeight: 500 }}
+                >
+                  Heavy Asset Utilization & Logistics
+                </span>
+              )}
             </div>
           </div>
           <nav style={{ display: "flex", gap: 2 }}>
             <NavBtn
-              label="Field View"
+              label={isMobile ? "Field" : "Field View"}
               icon="🚛"
               active={view === "field"}
               onClick={() => setView("field")}
+              compact={isMobile}
             />
             <NavBtn
-              label="Equipment Services"
+              label={isMobile ? "Equip Svcs" : "Equipment Services"}
               icon="📋"
               active={view === "equip"}
               onClick={() => setView("equip")}
+              compact={isMobile}
             />
           </nav>
         </div>
@@ -122,11 +121,13 @@ function NavBtn({
   icon,
   active,
   onClick,
+  compact,
 }: {
   label: string;
   icon: string;
   active: boolean;
   onClick: () => void;
+  compact?: boolean;
 }) {
   return (
     <button
@@ -134,19 +135,20 @@ function NavBtn({
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 6,
-        padding: "7px 16px",
+        gap: compact ? 4 : 6,
+        padding: compact ? "7px 10px" : "7px 16px",
         borderRadius: 6,
         border: "none",
         cursor: "pointer",
-        fontSize: 13,
+        fontSize: compact ? 12 : 13,
         fontWeight: 600,
-        backgroundColor: active ? S.navy : "transparent",
-        color: active ? S.white : S.black70,
+        minHeight: 44,
+        backgroundColor: active ? S.white : "transparent",
+        color: active ? S.navy : "rgba(255,255,255,0.85)",
         transition: "all 0.15s",
       }}
     >
-      <span style={{ fontSize: 15 }}>{icon}</span>
+      <span style={{ fontSize: compact ? 14 : 15 }}>{icon}</span>
       {label}
     </button>
   );

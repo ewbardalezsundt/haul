@@ -1,6 +1,7 @@
 "use client";
 
 import { S } from "@/lib/theme";
+import { useBreakpoint } from "@/lib/useBreakpoint";
 import { ASSETS, JOB_SITES, type EquipmentRequest } from "@/lib/data";
 import { StatusBadge, BackBtn, cardStyle } from "@/components/ui";
 
@@ -10,6 +11,7 @@ interface MyRequestsProps {
 }
 
 export default function MyRequests({ requests, onBack }: MyRequestsProps) {
+  const isMobile = useBreakpoint() === "mobile";
   return (
     <div>
       <BackBtn onClick={onBack} label="Back to catalog" />
@@ -23,9 +25,9 @@ export default function MyRequests({ requests, onBack }: MyRequestsProps) {
           return (
             <div
               key={req.id}
-              style={{ ...cardStyle, padding: 20, display: "flex", alignItems: "center", gap: 16 }}
+              style={{ ...cardStyle, padding: isMobile ? 16 : 20, display: "flex", alignItems: "center", gap: isMobile ? 12 : 16 }}
             >
-              <span style={{ fontSize: 30 }}>{asset?.photo}</span>
+              <img src={asset?.photo} alt={asset?.name || ""} style={{ width: 48, height: 36, objectFit: "cover", borderRadius: 4, flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                   <span style={{ fontFamily: "monospace", fontSize: 11, color: S.darkGray }}>

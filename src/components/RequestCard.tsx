@@ -1,6 +1,7 @@
 "use client";
 
 import { S } from "@/lib/theme";
+import { useBreakpoint } from "@/lib/useBreakpoint";
 import { ASSETS, ATTACHMENTS, JOB_SITES, type EquipmentRequest } from "@/lib/data";
 import { getOperatorCertStatus } from "@/lib/helpers";
 import { StatusBadge, Btn, CertIndicator, cardStyle } from "@/components/ui";
@@ -12,6 +13,7 @@ interface RequestCardProps {
 }
 
 export default function RequestCard({ req, onAccept, onDecline }: RequestCardProps) {
+  const isMobile = useBreakpoint() === "mobile";
   const asset = ASSETS.find((a) => a.id === req.assetId);
   const job = JOB_SITES.find((j) => j.id === req.jobSiteId);
   const cert = getOperatorCertStatus(req.operatorId, asset?.certRequired ?? null);
@@ -20,9 +22,9 @@ export default function RequestCard({ req, onAccept, onDecline }: RequestCardPro
     .filter(Boolean);
 
   return (
-    <div style={{ ...cardStyle, padding: 20 }}>
-      <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-        <span style={{ fontSize: 30, flexShrink: 0 }}>{asset?.photo}</span>
+    <div style={{ ...cardStyle, padding: isMobile ? 16 : 20 }}>
+      <div style={{ display: "flex", gap: isMobile ? 12 : 16, alignItems: "flex-start", flexWrap: isMobile ? "wrap" : undefined }}>
+        <img src={asset?.photo} alt={asset?.name || ""} style={{ width: 48, height: 36, objectFit: "cover", borderRadius: 4, flexShrink: 0 }} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
@@ -59,7 +61,7 @@ export default function RequestCard({ req, onAccept, onDecline }: RequestCardPro
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
+              gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr",
               gap: "4px 20px",
               marginTop: 8,
               fontSize: 12,
@@ -121,18 +123,18 @@ export default function RequestCard({ req, onAccept, onDecline }: RequestCardPro
 
         {/* Actions */}
         {req.status === "Pending" && onAccept && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}>
+          <div style={{ display: "flex", flexDirection: isMobile ? "row" : "column", gap: 6, flexShrink: 0, ...(isMobile ? { width: "100%", marginTop: 12 } : {}) }}>
             <Btn
               variant="submit"
               onClick={onAccept}
-              style={{ padding: "8px 16px", fontSize: 12 }}
+              style={{ padding: "8px 16px", fontSize: 12, ...(isMobile ? { flex: 1 } : {}) }}
             >
               Accept
             </Btn>
             <Btn
               variant="secondary"
               onClick={onDecline}
-              style={{ padding: "8px 16px", fontSize: 12, color: S.black70 }}
+              style={{ padding: "8px 16px", fontSize: 12, color: S.black70, ...(isMobile ? { flex: 1 } : {}) }}
             >
               Decline
             </Btn>
