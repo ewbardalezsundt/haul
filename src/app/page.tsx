@@ -39,11 +39,11 @@ export default function Home() {
     return id;
   };
 
-  const updateRequestStatus = (reqId: string, status: string, reason?: string) => {
+  const updateRequestStatus = (reqId: string, status: string, reason?: string, reasonCode?: string) => {
     setRequests((prev) =>
       prev.map((r) =>
         r.id === reqId
-          ? { ...r, status: status as EquipmentRequest["status"], ...(reason ? { declineReason: reason } : {}) }
+          ? { ...r, status: status as EquipmentRequest["status"], ...(reason ? { declineReason: reason } : {}), ...(reasonCode ? { declineReasonCode: reasonCode } : {}) }
           : r
       )
     );
