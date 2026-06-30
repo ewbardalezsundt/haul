@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════
+   SUNDT HAUL — Global Styles
+   ⚠️  Red (#EE373D) = brand only. Never error/danger.
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  --sundt-red: #EE373D;
+  --sundt-navy: #006699;
+  --sundt-blue: #0099CC;
+  --sundt-green: #78C196;
+  --sundt-yellow: #F3D03E;
+  --sundt-black-90: #16171A;
+  --sundt-black-80: #333333;
+  --sundt-black-70: #636467;
+  --sundt-almost-white: #F8F9FB;
+  --sundt-qdr-gray: #E2E3E6;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  background-color: var(--sundt-almost-white);
+  color: var(--sundt-black-90);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus styles for accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--sundt-navy);
+  outline-offset: 2px;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection color */
+::selection {
+  background-color: #E3F0F7;
+  color: var(--sundt-black-90);
+}

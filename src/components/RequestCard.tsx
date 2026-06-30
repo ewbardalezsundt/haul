@@ -1,0 +1,144 @@
+"use client";
+
+import { S } from "@/lib/theme";
+import { ASSETS, ATTACHMENTS, JOB_SITES, type EquipmentRequest } from "@/lib/data";
+import { getOperatorCertStatus } from "@/lib/helpers";
+import { StatusBadge, Btn, CertIndicator, cardStyle } from "@/components/ui";
+
+interface RequestCardProps {
+  req: EquipmentRequest;
+  onAccept?: () => void;
+  onDecline?: () => void;
+}
+
+export default function RequestCard({ req, onAccept, onDecline }: RequestCardProps) {
+  const asset = ASSETS.find((a) => a.id === req.assetId);
+  const job = JOB_SITES.find((j) => j.id === req.jobSiteId);
+  const cert = getOperatorCertStatus(req.operatorId, asset?.certRequired ?? null);
+  const attNames = req.attachments
+    .map((aId) => ATTACHMENTS.find((a) => a.id === aId)?.name)
+    .filter(Boolean);
+
+  return (
+    <div style={{ ...cardStyle, padding: 20 }}>
+      <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+        <span style={{ fontSize: 30, flexShrink: 0 }}>{asset?.photo}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              flexWrap: "wrap",
+              marginBottom: 4,
+            }}
+          >
+            <span style={{ fontFamily: "monospace", fontSize: 11, color: S.darkGray }}>
+              {req.id}
+            </span>
+            <StatusBadge status={req.status} />
+            {req.fueling && (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: S.navy,
+                  backgroundColor: "#E3F0F7",
+                  padding: "2px 8px",
+                  borderRadius: 10,
+                }}
+              >
+                ⛽ {req.fuelFreq}
+              </span>
+            )}
+          </div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: S.black90 }}>{asset?.name}</div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr",
+              gap: "4px 20px",
+              marginTop: 8,
+              fontSize: 12,
+            }}
+          >
+            <div>
+              <span style={{ color: S.darkGray }}>Job: </span>
+              <span style={{ fontWeight: 600, color: S.black80 }}>{job?.name}</span>
+            </div>
+            <div>
+              <span style={{ color: S.darkGray }}>By: </span>
+              <span style={{ fontWeight: 600, color: S.black80 }}>{req.requestedBy}</span>
+            </div>
+            <div>
+              <span style={{ color: S.darkGray }}>Dates: </span>
+              <span style={{ fontWeight: 600, color: S.black80 }}>
+                {req.startDate} → {req.endDate}
+              </span>
+            </div>
+          </div>
+          {attNames.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
+              {attNames.map((n, i) => (
+                <span
+                  key={i}
+                  style={{
+                    fontSize: 11,
+                    backgroundColor: S.lightQdr,
+                    color: S.black70,
+                    padding: "3px 8px",
+                    borderRadius: 4,
+                    fontWeight: 500,
+                  }}
+                >
+                  {n}
+                </span>
+              ))}
+            </div>
+          )}
+          <div style={{ marginTop: 8 }}>
+            <CertIndicator status={cert.status} label={cert.label} />
+          </div>
+          {req.declineReason && (
+            <div
+              style={{
+                fontSize: 11,
+                color: S.black70,
+                marginTop: 8,
+                backgroundColor: S.black5,
+                display: "inline-block",
+                padding: "4px 8px",
+                borderRadius: 4,
+              }}
+            >
+              Declined: {req.declineReason}
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        {req.status === "Pending" && onAccept && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}>
+            <Btn
+              variant="submit"
+              onClick={onAccept}
+              style={{ padding: "8px 16px", fontSize: 12 }}
+            >
+              Accept
+            </Btn>
+            <Btn
+              variant="secondary"
+              onClick={onDecline}
+              style={{ padding: "8px 16px", fontSize: 12, color: S.black70 }}
+            >
+              Decline
+            </Btn>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
