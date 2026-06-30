@@ -26,7 +26,7 @@ src/
 │   ├── theme.ts              ← Sundt brand color tokens (S.red, S.navy, etc.)
 │   ├── data.ts               ← All mock data with TypeScript interfaces
 │   ├── helpers.ts            ← getLocation, getCompatibleAttachments, getOperatorCertStatus
-│   ├── storage.ts            ← localStorage persistence (load/save requests & sequence num)
+│   ├── storage.ts            ← localStorage persistence (load/save requests, assets & sequence nums)
 │   └── useBreakpoint.ts      ← Responsive hook: mobile/tablet/desktop
 └── components/
     ├── ui.tsx                ← Shared: Btn, StatusBadge, BackBtn, SectionLabel, InfoRow, CertIndicator
@@ -70,7 +70,7 @@ public/
 
 ### Mock Data (in `src/lib/data.ts`)
 
-- **23 assets** across 15 types (Excavator, Skid Steer, Loader, Crane, Generator, Dozer, Telehandler, Compactor, Light Tower, Backhoe, Boom Lift, Reach Fork, Trench Plate, Camera, Specialty Tool)
+- **23 seed assets** across 15 types (Excavator, Skid Steer, Loader, Crane, Generator, Dozer, Telehandler, Compactor, Light Tower, Backhoe, Boom Lift, Reach Fork, Trench Plate, Camera, Specialty Tool) — additional assets can be added at runtime via the Equipment Services "Add Equipment" form (SPEC-018)
 - **4 yards** (Tempe, Tucson, Chandler, Mesa)
 - **5 job sites** with project codes
 - **8 attachments** with compatibility mapping
@@ -191,6 +191,7 @@ HAUL builds on an original Equipment Services pitch (`ESD_Spark_Idea_2.pptx`) wi
 - [x] ~~**Certification Compliance (P1)**~~ **Done.** — CSS conic-gradient donut showing operator cert compliance % with Compliant / Expiring Soon / Expired counts and legend. Mock data from OPERATORS. Matches pitch deck Slide 8. (SPEC-015)
 - [x] ~~**Upcoming Maintenance Table (P1)**~~ **Done.** — Table with 5 upcoming maintenance items (photo + name, type, due date). Yellow highlight for due within 3 days, gray for overdue. Mock `UPCOMING_MAINTENANCE` data in `data.ts`. Matches pitch deck Slide 8. (SPEC-016)
 - [x] ~~**Availability Calendar (P1)**~~ **Done.** — 30-day horizontal bar on Asset Detail: green (available), navy (committed), yellow (pending), dark-yellow (maintenance). Built from actual request dates + asset maintenance status. Hover tooltips show date + status. Color legend below bar. `requests` prop threaded from FieldView. Matches pitch deck Slide 11 Phase 1 commitment. (SPEC-017)
+- [x] ~~**Add New Equipment (P1)**~~ **Done.** — Equipment Services coordinators can add assets to the fleet from the Fleet tab via a "+ Add Equipment" form. Assets lifted from static `const` into React state with localStorage persistence (mirroring requests pattern). Form has 2-column responsive grid: name, type, make, model, year, yard, status, ready date, rate, cert required, photo dropdown, dynamic specs key/value builder. Submit button uses `#00A200` (Submit Green). New assets appear immediately in Fleet Overview, Field View catalog, and KPI calculations. `window.__resetHaul()` clears back to seed data. (SPEC-018)
 
 **Other hackathon stretch goals:**
 - [x] ~~Polish the Gantt/availability calendar (currently just a status badge + ready date — could be a 30-day visual)~~ **Done.** (SPEC-017)
@@ -219,6 +220,7 @@ HAUL is a field-use app — supervisors and foremen will access it from phones a
 - [x] ~~**Structured Decline / Delay Reasons**~~ **Done.** — 6-code dropdown (Maintenance, Unavailable Date, Cert Issue, Transport Constraint, Better Substitute, Other) + optional notes. `DECLINE_REASONS` in `data.ts`, `declineReasonCode` on `EquipmentRequest`. History shows bold label + notes. (SPEC-004)
 - [x] ~~**Request Operator Service Option**~~ **Done.** — Toggle in Order Wizard Step 3 alongside fueling. `operatorRequested` field on `EquipmentRequest`. Badge on RequestCard. (SPEC-005)
 - [x] ~~**Dispatch-Oriented Queue Grouping**~~ **Done.** — Today / This Week / Future headers in Equipment Services queue. (SPEC-007)
+- [x] ~~**Add New Equipment**~~ **Done.** — "+ Add Equipment" form on Fleet tab. Assets in React state + localStorage. 2-column responsive form with all Asset fields + dynamic specs builder. New assets appear across all views and KPIs instantly. `CERT_TYPES` added to `data.ts`. `storage.ts` extended with asset load/save. `ASSETS` threaded as prop through `FieldView`, `EquipServicesView`, `FleetOverview`. (SPEC-018)
 
 ### Post-MVP (deferred features documented in HAUL_MVP_Plan.md)
 - PM View: cost dashboards, internal vs. external spend, cost avoidance, job-level billing
@@ -240,7 +242,7 @@ HAUL is a field-use app — supervisors and foremen will access it from phones a
 |---|---|
 | `C:\Repo\haul\haul` | Project root — run `npm run dev` here |
 | `src/lib/data.ts` | All mock data + TypeScript interfaces — edit here to change seed data |
-| `src/lib/storage.ts` | localStorage persistence — load/save requests & sequence number, resetStorage() |
+| `src/lib/storage.ts` | localStorage persistence — load/save requests, assets & sequence numbers, resetStorage() |
 | `src/lib/theme.ts` | Sundt brand tokens — single source of truth for colors |
 | `src/app/page.tsx` | App entry point — header, nav, state management |
 | `public/images/` | Sundt logo + 17 equipment photos (see `HAUL_Image_Requirements.md` for manifest) |
@@ -254,4 +256,4 @@ HAUL is a field-use app — supervisors and foremen will access it from phones a
 
 ---
 
-*Last updated: June 30, 2026. SPEC-017 (availability calendar) implemented — 30-day horizontal bar on Asset Detail with green/navy/yellow/dark-yellow blocks, hover tooltips, legend; requests prop threaded from FieldView. SPEC-016 (upcoming maintenance table) implemented — 5-row table with equipment photo, maintenance type, due date; yellow/gray urgency highlights. SPEC-015 (certification compliance) implemented — CSS donut with compliance %, legend. SPEC-012 (browse by category) implemented — 8 category cards with filter. SPEC-010 (interactive asset map) implemented --- SVG map with clickable yard/job-site pins, location filter chip. SPEC-009 (transit time) implemented --- transit matrix, estimates in Order Review, RequestCard, AssetDetail. "Request This Equipment" button changed from brand-red to submitGreen (#00A200). SPEC-008 (status change notifications) implemented — toast on view-switch with auto-dismiss. SPEC-007 (dispatch queue grouping) implemented — Today/This Week/Future headers with count badges. SPEC-005 (request operator service) implemented — toggle in Order Wizard Step 3, badge on RequestCard. SPEC-002 (substitute recommendations) previously completed. All seed data dates updated from 2025 to 2026. Fueling frequency options expanded (Daily—Morning/Evening, Every Other Day). “Request This Equipment” button changed from red to SundtGreen (#78C196). Catalog filter labels (TYPE/STATUS) added; status filter expanded to All/Available/Deployed/In Maintenance. All features use mock data per hackathon rules (no auth).*
+*Last updated: June 30, 2026. SPEC-018 (add new equipment) implemented — "+Add Equipment" form on Fleet tab; assets lifted into React state with localStorage persistence; CERT_TYPES added; storage.ts extended; assets prop threaded through FieldView, EquipServicesView, FleetOverview; 2-column responsive form with dynamic specs builder; Submit Green button; success toast. SPEC-017 (availability calendar) implemented — 30-day horizontal bar on Asset Detail with green/navy/yellow/dark-yellow blocks, hover tooltips, legend; requests prop threaded from FieldView. SPEC-016 (upcoming maintenance table) implemented — 5-row table with equipment photo, maintenance type, due date; yellow/gray urgency highlights. SPEC-015 (certification compliance) implemented — CSS donut with compliance %, legend. SPEC-012 (browse by category) implemented — 8 category cards with filter. SPEC-010 (interactive asset map) implemented --- SVG map with clickable yard/job-site pins, location filter chip. SPEC-009 (transit time) implemented --- transit matrix, estimates in Order Review, RequestCard, AssetDetail. "Request This Equipment" button changed from brand-red to submitGreen (#00A200). SPEC-008 (status change notifications) implemented — toast on view-switch with auto-dismiss. SPEC-007 (dispatch queue grouping) implemented — Today/This Week/Future headers with count badges. SPEC-005 (request operator service) implemented — toggle in Order Wizard Step 3, badge on RequestCard. SPEC-002 (substitute recommendations) previously completed. All seed data dates updated from 2025 to 2026. Fueling frequency options expanded (Daily—Morning/Evening, Every Other Day). “Request This Equipment” button changed from red to SundtGreen (#78C196). Catalog filter labels (TYPE/STATUS) added; status filter expanded to All/Available/Deployed/In Maintenance. All features use mock data per hackathon rules (no auth).*

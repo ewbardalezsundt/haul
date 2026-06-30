@@ -221,3 +221,8 @@ export const CATEGORIES = [
   "Generator", "Dozer", "Telehandler", "Compactor", "Light Tower",
   "Backhoe", "Boom Lift", "Reach Fork", "Trench Plate", "Camera", "Specialty Tool",
 ];
+
+export const CERT_TYPES = [
+  "Excavator", "Skid Steer", "Loader", "Crane",
+  "Generator", "Dozer", "Boom Lift",
+] as const;
