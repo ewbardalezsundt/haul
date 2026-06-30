@@ -26,6 +26,7 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
     fueling: false,
     fuelFreq: "Weekly",
     operatorId: "",
+    operatorRequested: false,
   });
 
   const compatible = getCompatibleAttachments(asset.type);
@@ -45,6 +46,7 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
       fueling: form.fueling,
       fuelFreq: form.fueling ? form.fuelFreq : null,
       operatorId: form.operatorId || null,
+      operatorRequested: form.operatorRequested,
     });
   };
 
@@ -264,6 +266,7 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
                 </span>
               </label>
               {form.fueling && (
+
                 <div style={{ marginLeft: 28 }}>
                   <label style={labelStyle}>Fueling Frequency</label>
                   <select
@@ -278,6 +281,33 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
                   </select>
                 </div>
               )}
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: 16,
+                  border: `1px solid ${S.qdrGray}`,
+                  borderRadius: 8,
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={form.operatorRequested}
+                  onChange={(e) => setForm({ ...form, operatorRequested: e.target.checked })}
+                  style={{ accentColor: S.navy }}
+                />
+                <span style={{ fontSize: 15 }}>👷</span>
+                <div>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: S.black80 }}>
+                    Request Sundt-provided operator
+                  </span>
+                  <p style={{ fontSize: 11, color: S.black70, margin: "2px 0 0" }}>
+                    Equipment Services will assign a certified operator
+                  </p>
+                </div>
+              </label>
             </div>
           )}
 
@@ -303,6 +333,7 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
                   />
                 )}
                 <InfoRow label="Fueling" value={form.fueling ? `Yes — ${form.fuelFreq}` : "No"} />
+                <InfoRow label="Operator Service" value={form.operatorRequested ? "Yes — Sundt-provided" : "Self-operated"} />
                 {form.operatorId && (
                   <InfoRow
                     label="Operator"

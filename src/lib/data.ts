@@ -56,6 +56,7 @@ export interface EquipmentRequest {
   fueling: boolean;
   fuelFreq: string | null;
   operatorId: string | null;
+  operatorRequested?: boolean;
   status: "Pending" | "Accepted" | "Declined" | "In Transit";
   submittedAt: string;
   declineReason?: string;

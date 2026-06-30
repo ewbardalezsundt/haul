@@ -56,6 +56,23 @@ export default function RequestCard({ req, onAccept, onDecline }: RequestCardPro
                 ⛽ {req.fuelFreq}
               </span>
             )}
+            {req.operatorRequested && (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: S.darkGreen || "#2E7D32",
+                  backgroundColor: "#E8F5E9",
+                  padding: "2px 8px",
+                  borderRadius: 10,
+                }}
+              >
+                👷 Operator Requested
+              </span>
+            )}
           </div>
           <div style={{ fontSize: 15, fontWeight: 700, color: S.black90 }}>{asset?.name}</div>
           <div
