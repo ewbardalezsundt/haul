@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════════
@@ -31,6 +32,9 @@ body {
   color: var(--sundt-black-90);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Prevent horizontal page scroll and restrict touch gestures to vertical panning by default */
+  touch-action: pan-y;
+  overflow-x: hidden;
 }
 
 /* Focus styles for accessibility */
@@ -45,6 +49,14 @@ textarea:focus-visible {
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+/* Horizontal scroller (for category cards, etc.) */
+.horizontal-scroller {
+  /* Enable horizontal scrolling when content overflows */
+  overflow-x: auto;
+  /* Allow horizontal touch gesture only on this container */
+  touch-action: pan-x;
 }
 
 /* Responsive main padding */
@@ -63,5 +75,58 @@ html {
 /* Selection color */
 ::selection {
   background-color: #E3F0F7;
+  color: var(--sundt-black-90);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Component-specific styles
+   ═══════════════════════════════════════════════════════════ */
+
+/* Category Browser (SPEC-012) */
+.category-browser {
+  margin-bottom: 20px;
+}
+
+.category-browser-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.category-browser-view-all {
+  font-size: 12px;
+  color: var(--sundt-navy);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 6px;
+}
+
+.category-card {
+  flex-shrink: 0;
+  border: 1px solid var(--sundt-qdr-gray);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: var(--sundt-white);
+  padding: 0;
+  transition: border-color 0.15s;
+}
+.category-card:hover {
+  border-color: var(--sundt-navy);
+}
+
+.category-card--selected {
+  border: 2px solid var(--sundt-navy);
+}
+
+.category-card-label {
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
   color: var(--sundt-black-90);
 }

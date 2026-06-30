@@ -157,80 +157,28 @@ export default function FieldView({ assets, requests, addRequest }: FieldViewPro
         </Btn>
       </div>
 
+      </div>
+
       {/* Browse by Category Cards */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+      <div className="category-browser">
+        <div className="category-browser-header">
           <SectionLabel>Browse by Category</SectionLabel>
-          <button
-            onClick={() => setCategory("All")}
-            style={{
-              fontSize: 12,
-              color: S.navy,
-              border: "none",
-              background: "none",
-              cursor: "pointer",
-              fontWeight: 600,
-              padding: 0,
-              marginBottom: 12,
-            }}
-          >
+          <button onClick={() => setCategory("All")} className="category-browser-view-all">
             View all
           </button>
         </div>
-        <div
-          style={{
-            display: "flex",
-            gap: 12,
-            overflowX: "auto",
-            paddingBottom: 8,
-            WebkitOverflowScrolling: "touch" as const,
-          }}
-        >
+        <div className="horizontal-scroller" style={{ display: "flex", gap: isMobile ? 10 : 12, paddingBottom: 8 }}>
           {CATEGORY_CARDS.map((cat) => (
             <button
               key={cat.type}
-              onClick={() => setCategory(cat.type)}
-              style={{
-                flexShrink: 0,
-                width: isMobile ? 90 : 110,
-                border: category === cat.type ? `2px solid ${S.navy}` : `1px solid ${S.qdrGray}`,
-                borderRadius: 10,
-                overflow: "hidden",
-                cursor: "pointer",
-                backgroundColor: S.white,
-                padding: 0,
-                transition: "all 0.15s",
-              }}
-              onMouseEnter={(e) => {
-                if (category !== cat.type) {
-                  e.currentTarget.style.borderColor = S.navy;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (category !== cat.type) {
-                  e.currentTarget.style.borderColor = S.qdrGray;
-                }
-              }}
+              onClick={() => setCategory(category === cat.type ? "All" : cat.type)}
+              className={`category-card ${category === cat.type ? 'category-card--selected' : ''}`}
+              style={{ width: isMobile ? 90 : 110 }}
             >
-              <img
-                src={cat.image}
-                alt={cat.label}
-                style={{ width: "100%", height: isMobile ? 60 : 70, objectFit: "cover" }}
-              />
-              <div
-                style={{
-                  padding: "6px 8px",
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: S.black90,
-                  textAlign: "center" as const,
-                }}
-              >
-                {cat.label}
-              </div>
+              <img alt={cat.label} src={cat.image} style={{ width: "100%", height: isMobile ? 60 : 70, objectFit: "cover" }} />
+              <div className="category-card-label">{cat.label}</div>
             </button>
           ))}
-        </div>
         </div>
       </div>
 

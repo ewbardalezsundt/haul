@@ -184,7 +184,15 @@ export const TRANSIT_MINUTES: Record<string, Record<string, number>> = {
   "yard-4": { "job-1": 25, "job-2": 30, "job-3": 115, "job-4": 10, "job-5": 20 },
 };
 
-// ── Category Cards for Browse View ────────────────────────
+// ── Filter categories ───────────────────────────────────
+
+export const CATEGORIES = [
+  "All", "Excavator", "Skid Steer", "Loader", "Crane",
+  "Generator", "Dozer", "Telehandler", "Compactor", "Light Tower",
+  "Backhoe", "Boom Lift", "Reach Fork", "Trench Plate", "Camera", "Specialty Tool",
+];
+
+// ── Category Cards for Browse View (SPEC-012) ────────────────────────
 
 export const CATEGORY_CARDS: { type: string; label: string; image: string }[] = [
   { type: "Excavator", label: "Excavators", image: "/images/equipment/cat-320-excavator.jpg" },
@@ -196,8 +204,6 @@ export const CATEGORY_CARDS: { type: string; label: string; image: string }[] = 
   { type: "Generator", label: "Generators", image: "/images/equipment/cat-xq200-generator.jpg" },
   { type: "Compactor", label: "Compaction", image: "/images/equipment/cat-cs56b-compactor.jpg" },
 ];
-
-// ── Filter categories ───────────────────────────────────
 
 // ── Upcoming Maintenance Schedule (SPEC-016) ────────────
 
@@ -216,11 +222,6 @@ export const UPCOMING_MAINTENANCE: MaintenanceSchedule[] = [
   { assetId: "asset-6", type: "Inspection", dueDate: "2026-07-17" },
 ];
 
-export const CATEGORIES = [
-  "All", "Excavator", "Skid Steer", "Loader", "Crane",
-  "Generator", "Dozer", "Telehandler", "Compactor", "Light Tower",
-  "Backhoe", "Boom Lift", "Reach Fork", "Trench Plate", "Camera", "Specialty Tool",
-];
 
 export const CERT_TYPES = [
   "Excavator", "Skid Steer", "Loader", "Crane",
