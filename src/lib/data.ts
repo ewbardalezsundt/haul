@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // MOCK DATA — shaped like real Sundt Equipment Services data
 // ═══════════════════════════════════════════════════════════
 
@@ -6,6 +6,8 @@ export interface Yard {
   id: string;
   name: string;
   city: string;
+  lat: number;
+  lng: number;
 }
 
 export interface JobSite {
@@ -13,6 +15,8 @@ export interface JobSite {
   name: string;
   pm: string;
   code: string;
+  lat: number;
+  lng: number;
 }
 
 export interface Attachment {
@@ -82,20 +86,20 @@ export const DECLINE_REASONS = [
 // ── Yards ───────────────────────────────────────────────
 
 export const YARDS: Yard[] = [
-  { id: "yard-1", name: "Tempe Yard", city: "Tempe, AZ" },
-  { id: "yard-2", name: "Tucson Yard", city: "Tucson, AZ" },
-  { id: "yard-3", name: "Chandler Yard", city: "Chandler, AZ" },
-  { id: "yard-4", name: "Mesa Yard", city: "Mesa, AZ" },
+  { id: "yard-1", name: "Tempe Yard", city: "Tempe, AZ", lat: 33.4255, lng: -111.9400 },
+  { id: "yard-2", name: "Tucson Yard", city: "Tucson, AZ", lat: 32.2226, lng: -110.9747 },
+  { id: "yard-3", name: "Chandler Yard", city: "Chandler, AZ", lat: 33.3062, lng: -111.8413 },
+  { id: "yard-4", name: "Mesa Yard", city: "Mesa, AZ", lat: 33.4152, lng: -111.8315 },
 ];
 
 // ── Job Sites ───────────────────────────────────────────
 
 export const JOB_SITES: JobSite[] = [
-  { id: "job-1", name: "I-10 Broadway Curve", pm: "Martinez", code: "AZ-2026-041" },
-  { id: "job-2", name: "Chandler Municipal Center", pm: "Johnson", code: "AZ-2026-018" },
-  { id: "job-3", name: "Tucson Water Reclamation", pm: "Davis", code: "AZ-2026-033" },
-  { id: "job-4", name: "Mesa Light Rail Extension", pm: "Thompson", code: "AZ-2026-027" },
-  { id: "job-5", name: "ASU Research Campus", pm: "Wilson", code: "AZ-2026-052" },
+  { id: "job-1", name: "I-10 Broadway Curve", pm: "Martinez", code: "AZ-2026-041", lat: 33.3933, lng: -111.9780 },
+  { id: "job-2", name: "Chandler Municipal Center", pm: "Johnson", code: "AZ-2026-018", lat: 33.3028, lng: -111.8414 },
+  { id: "job-3", name: "Tucson Water Reclamation", pm: "Davis", code: "AZ-2026-033", lat: 32.1800, lng: -110.9500 },
+  { id: "job-4", name: "Mesa Light Rail Extension", pm: "Thompson", code: "AZ-2026-027", lat: 33.4148, lng: -111.7890 },
+  { id: "job-5", name: "ASU Research Campus", pm: "Wilson", code: "AZ-2026-052", lat: 33.4242, lng: -111.9281 },
 ];
 
 // ── Attachments ─────────────────────────────────────────

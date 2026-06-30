@@ -1,4 +1,4 @@
-# HANDOFF — HAUL (Heavy Asset Utilization & Logistics)
+﻿# HANDOFF — HAUL (Heavy Asset Utilization & Logistics)
 
 ## Goal
 
@@ -194,7 +194,7 @@ HAUL builds on an original Equipment Services pitch (`ESD_Spark_Idea_2.pptx`) wi
 
 **Other hackathon stretch goals:**
 - [ ] Polish the Gantt/availability calendar (currently just a status badge + ready date — could be a 30-day visual)
-- [ ] Add a map component to Field View showing asset locations across yards
+- [x] ~~Add a map component to Field View showing asset locations across yards~~ **Done.** (SPEC-010)
 - [ ] Add maintenance schedule visibility to Equipment Services view
 - [ ] Consider adding notification/toast when a request status changes
 - [x] ~~Mobile responsiveness pass~~ **Done.** (SPEC-001)
@@ -212,9 +212,9 @@ HAUL is a field-use app — supervisors and foremen will access it from phones a
 
 #### P1 — High-Value Additions for Initial Release
 
-- [ ] **Yard & Job Site Map** — Add an interactive map component to Field View showing the four Arizona yards and five job sites as pin markers. Clicking a pin shows assets at that location. For demo, a static map with plotted coordinates is sufficient. For production, this becomes the foundation for the telematics integration in Phase 5.
+- [x] ~~**Yard & Job Site Map**~~ **Done.** --- `AssetMap.tsx`: static SVG map with 4 yard pins (navy diamonds + asset count) and 5 job site pins (blue dots + deployed count). Hover tooltips. Click pin to filter catalog by location (navy chip with clear button). Map toggle in header (hidden on mobile). Lat/lng added to Yard and JobSite interfaces. (SPEC-010) — Add an interactive map component to Field View showing the four Arizona yards and five job sites as pin markers. Clicking a pin shows assets at that location. For demo, a static map with plotted coordinates is sufficient. For production, this becomes the foundation for the telematics integration in Phase 5.
 - [x] ~~**Status Change Notifications**~~ **Done.** — Toast on view-switch with auto-dismiss. (SPEC-008)
-- [ ] **Estimated Delivery / Transit Time** — Show estimated arrival time on each asset based on yard-to-jobsite distance. Hardcode transit estimates for the 4 yards × 5 job sites matrix (20 combinations). Display as "Est. arrival: ~2 hours from Tucson Yard" on asset detail and order review screens.
+- [x] ~~**Estimated Delivery / Transit Time**~~ **Done.** --- Transit matrix (4 yards x 5 job sites) in `data.ts`. `getTransitEstimate()` and `getTransitRange()` in `helpers.ts`. Order Review (Step 4), RequestCard, and AssetDetail all show transit estimates. Only displayed when asset is at a yard. (SPEC-009) — Show estimated arrival time on each asset based on yard-to-jobsite distance. Hardcode transit estimates for the 4 yards × 5 job sites matrix (20 combinations). Display as "Est. arrival: ~2 hours from Tucson Yard" on asset detail and order review screens.
 - [ ] **Delivery Details in Order Wizard** — Add optional delivery fields: contact name/phone, gate/access notes, preferred drop zone, site hours, unloading support needed. Reduces follow-up phone calls significantly.
 - [x] ~~**Structured Decline / Delay Reasons**~~ **Done.** — 6-code dropdown (Maintenance, Unavailable Date, Cert Issue, Transport Constraint, Better Substitute, Other) + optional notes. `DECLINE_REASONS` in `data.ts`, `declineReasonCode` on `EquipmentRequest`. History shows bold label + notes. (SPEC-004)
 - [x] ~~**Request Operator Service Option**~~ **Done.** — Toggle in Order Wizard Step 3 alongside fueling. `operatorRequested` field on `EquipmentRequest`. Badge on RequestCard. (SPEC-005)
@@ -254,4 +254,4 @@ HAUL is a field-use app — supervisors and foremen will access it from phones a
 
 ---
 
-*Last updated: June 30, 2026. SPEC-008 (status change notifications) implemented — toast on view-switch with auto-dismiss. SPEC-007 (dispatch queue grouping) implemented — Today/This Week/Future headers with count badges. SPEC-005 (request operator service) implemented — toggle in Order Wizard Step 3, badge on RequestCard. SPEC-002 (substitute recommendations) previously completed. All seed data dates updated from 2025 to 2026. Fueling frequency options expanded (Daily—Morning/Evening, Every Other Day). “Request This Equipment” button changed from red to SundtGreen (#78C196). Catalog filter labels (TYPE/STATUS) added; status filter expanded to All/Available/Deployed/In Maintenance. All features use mock data per hackathon rules (no auth).*
+*Last updated: June 30, 2026. SPEC-010 (interactive asset map) implemented --- SVG map with clickable yard/job-site pins, location filter chip. SPEC-009 (transit time) implemented --- transit matrix, estimates in Order Review, RequestCard, AssetDetail. "Request This Equipment" button changed from brand-red to submitGreen (#00A200). SPEC-008 (status change notifications) implemented — toast on view-switch with auto-dismiss. SPEC-007 (dispatch queue grouping) implemented — Today/This Week/Future headers with count badges. SPEC-005 (request operator service) implemented — toggle in Order Wizard Step 3, badge on RequestCard. SPEC-002 (substitute recommendations) previously completed. All seed data dates updated from 2025 to 2026. Fueling frequency options expanded (Daily—Morning/Evening, Every Other Day). “Request This Equipment” button changed from red to SundtGreen (#78C196). Catalog filter labels (TYPE/STATUS) added; status filter expanded to All/Available/Deployed/In Maintenance. All features use mock data per hackathon rules (no auth).*
