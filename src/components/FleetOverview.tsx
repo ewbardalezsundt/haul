@@ -3,16 +3,20 @@
 import { useState } from "react";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
-import { ASSETS } from "@/lib/data";
+import { type Asset } from "@/lib/data";
 import { getLocation } from "@/lib/helpers";
 import { StatusBadge, cardStyle } from "@/components/ui";
 
-export default function FleetOverview() {
+interface FleetOverviewProps {
+  assets: Asset[];
+}
+
+export default function FleetOverview({ assets }: FleetOverviewProps) {
   const isMobile = useBreakpoint() === "mobile";
   const cellPad = isMobile ? "8px 12px" : "10px 16px";
   const [fleetFilter, setFleetFilter] = useState("All");
   const filtered =
-    fleetFilter === "All" ? ASSETS : ASSETS.filter((a) => a.status === fleetFilter);
+    fleetFilter === "All" ? assets : assets.filter((a) => a.status === fleetFilter);
 
   return (
     <div>

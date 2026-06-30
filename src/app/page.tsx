@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
-import { ASSETS, INITIAL_REQUESTS, type EquipmentRequest } from "@/lib/data";
-import { loadRequests, saveRequests, loadNextReqNum, saveNextReqNum, resetStorage } from "@/lib/storage";
+import { ASSETS, INITIAL_REQUESTS, type EquipmentRequest, type Asset } from "@/lib/data";
+import { loadRequests, saveRequests, loadNextReqNum, saveNextReqNum, loadAssets, saveAssets, loadNextAssetNum, saveNextAssetNum, resetStorage } from "@/lib/storage";
 import FieldView from "@/components/FieldView";
 import EquipServicesView from "@/components/EquipServicesView";
 
@@ -14,6 +14,8 @@ export default function Home() {
   const [view, setView] = useState<"field" | "equip">("field");
   const [requests, setRequests] = useState<EquipmentRequest[]>(INITIAL_REQUESTS);
   const [nextReqNum, setNextReqNum] = useState(8);
+  const [assets, setAssets] = useState<Asset[]>(ASSETS);
+  const [nextAssetNum, setNextAssetNum] = useState(ASSETS.length + 1);
   const [isHydrated, setIsHydrated] = useState(false);
   const [notifications, setNotifications] = useState<string[]>([]);
   const prevRequestsRef = useRef<EquipmentRequest[]>(requests);
@@ -24,6 +26,10 @@ export default function Home() {
     const storedSeq = loadNextReqNum();
     setRequests(stored);
     setNextReqNum(storedSeq);
+    const storedAssets = loadAssets();
+    const storedAssetSeq = loadNextAssetNum();
+    setAssets(storedAssets);
+    setNextAssetNum(storedAssetSeq);
     setIsHydrated(true);
   }, []);
 
@@ -40,7 +46,7 @@ export default function Home() {
     for (const req of requests) {
       const old = prev.find((r) => r.id === req.id);
       if (old && old.status !== req.status) {
-        const asset = ASSETS.find((a) => a.id === req.assetId)?.name ?? req.assetId;
+        const asset = assets.find((a) => a.id === req.assetId)?.name ?? req.assetId;
         if (req.status === "Accepted") msgs.push(`\u2705 ${req.id} accepted \u2014 ${asset}`);
         else if (req.status === "Declined") msgs.push(`${req.id} declined \u2014 ${asset}`);
         else if (req.status === "In Transit") msgs.push(`\ud83d\ude9b ${req.id} \u2014 ${asset} is in transit`);
@@ -49,10 +55,11 @@ export default function Home() {
     if (msgs.length > 0) setNotifications(msgs);
     prevRequestsRef.current = [...requests];
     setView("field");
-  }, [requests]);
+  }, [requests, assets]);
 
-  // Persist requests to localStorage on every change
+  // Persist requests & assets to localStorage on every change
   useEffect(() => { saveRequests(requests); }, [requests]);
+  useEffect(() => { saveAssets(assets); }, [assets]);
 
   // Expose reset for demo/dev console: window.__resetHaul()
   useEffect(() => {
@@ -74,6 +81,16 @@ export default function Home() {
     });
     return id;
   };
+
+  const addAsset = useCallback((draft: Omit<Asset, "id">) => {
+    const id = `asset-${nextAssetNum}`;
+    setAssets((prev) => [...prev, { ...draft, id }]);
+    setNextAssetNum((n) => {
+      saveNextAssetNum(n + 1);
+      return n + 1;
+    });
+    return id;
+  }, [nextAssetNum]);
 
   const updateRequestStatus = (reqId: string, status: string, reason?: string, reasonCode?: string) => {
     setRequests((prev) =>
@@ -159,9 +176,9 @@ export default function Home() {
       <main style={{ maxWidth: 1200, margin: "0 auto", padding: "24px 24px" }}>
         {isHydrated ? (
           view === "field" ? (
-            <FieldView requests={requests} addRequest={addRequest} />
+            <FieldView assets={assets} requests={requests} addRequest={addRequest} />
           ) : (
-            <EquipServicesView requests={requests} updateRequestStatus={updateRequestStatus} />
+            <EquipServicesView assets={assets} requests={requests} updateRequestStatus={updateRequestStatus} addAsset={addAsset} />
           )
         ) : (
           <div style={{ minHeight: 400, display: "flex", alignItems: "center", justifyContent: "center" }}>

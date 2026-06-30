@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
-import { ASSETS, CATEGORIES, CATEGORY_CARDS, MOCK_USER, type EquipmentRequest } from "@/lib/data";
+import { CATEGORIES, CATEGORY_CARDS, MOCK_USER, type EquipmentRequest, type Asset } from "@/lib/data";
 import { getLocation } from "@/lib/helpers";
 import { StatusBadge, Btn, SectionLabel, cardStyle, inputStyle } from "@/components/ui";
 import AssetDetail from "@/components/AssetDetail";
@@ -15,19 +15,20 @@ import MyRequests from "@/components/MyRequests";
 const AssetMap = dynamic(() => import("@/components/AssetMap"), { ssr: false });
 
 interface FieldViewProps {
+  assets: Asset[];
   requests: EquipmentRequest[];
   addRequest: (req: Omit<EquipmentRequest, "id" | "status" | "submittedAt">) => string;
 }
 
-export default function FieldView({ requests, addRequest }: FieldViewProps) {
+export default function FieldView({ assets, requests, addRequest }: FieldViewProps) {
   const bp = useBreakpoint();
   const isMobile = bp === "mobile";
   const isTablet = bp === "tablet";
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [selectedAsset, setSelectedAsset] = useState<typeof ASSETS[number] | null>(null);
-  const [orderAsset, setOrderAsset] = useState<typeof ASSETS[number] | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [orderAsset, setOrderAsset] = useState<Asset | null>(null);
   const [showRequests, setShowRequests] = useState(false);
   const [confirmReqId, setConfirmReqId] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
@@ -45,14 +46,14 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
   );
 
   const filtered = useMemo(() => {
-    return ASSETS.filter((a) => {
+    return assets.filter((a) => {
       if (category !== "All" && a.type !== category) return false;
       if (statusFilter !== "All" && a.status !== statusFilter) return false;
       if (locationFilter && a.location !== locationFilter) return false;
       if (search && !`${a.name} ${a.make} ${a.model} ${a.type}`.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [search, category, statusFilter, locationFilter]);
+  }, [search, category, statusFilter, locationFilter, assets]);
 
   const activeRequests = useMemo(() => {
     return requests
@@ -255,7 +256,7 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
             </button>
           </div>
           {activeRequests.map((req) => {
-            const asset = ASSETS.find((a) => a.id === req.assetId);
+            const asset = assets.find((a) => a.id === req.assetId);
             return (
               <div
                 key={req.id}

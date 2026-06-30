@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
-import { ASSETS, OPERATORS, DECLINE_REASONS, UPCOMING_MAINTENANCE, type EquipmentRequest } from "@/lib/data";
+import { OPERATORS, DECLINE_REASONS, UPCOMING_MAINTENANCE, YARDS, CATEGORIES, CERT_TYPES, type EquipmentRequest, type Asset } from "@/lib/data";
 import { Btn, cardStyle, inputStyle } from "@/components/ui";
 import RequestCard from "@/components/RequestCard";
 import FleetOverview from "@/components/FleetOverview";
@@ -57,18 +57,37 @@ function GroupHeader({ label, count, color }: { label: string; count: number; co
 }
 
 interface EquipServicesViewProps {
+  assets: Asset[];
   requests: EquipmentRequest[];
   updateRequestStatus: (reqId: string, status: string, reason?: string, reasonCode?: string) => void;
+  addAsset: (draft: Omit<Asset, "id">) => string;
 }
 
 export default function EquipServicesView({
+  assets,
   requests,
   updateRequestStatus,
+  addAsset,
 }: EquipServicesViewProps) {
   const [tab, setTab] = useState("queue");
   const [declineReqId, setDeclineReqId] = useState<string | null>(null);
   const [declineCode, setDeclineCode] = useState("");
   const [declineReason, setDeclineReason] = useState("");
+  // --- Add Equipment form state (SPEC-018) ---
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newType, setNewType] = useState("");
+  const [newMake, setNewMake] = useState("");
+  const [newModel, setNewModel] = useState("");
+  const [newYear, setNewYear] = useState(2026);
+  const [newYard, setNewYard] = useState(YARDS[0].id);
+  const [newStatus, setNewStatus] = useState<"Available" | "In Maintenance">("Available");
+  const [newReadyDate, setNewReadyDate] = useState("2026-06-30");
+  const [newRate, setNewRate] = useState("");
+  const [newCert, setNewCert] = useState("none");
+  const [newPhoto, setNewPhoto] = useState("");
+  const [newSpecs, setNewSpecs] = useState<{ key: string; value: string }[]>([]);
+  const [addSuccess, setAddSuccess] = useState(false);
   const bp = useBreakpoint();
   const isMobile = bp === "mobile";
   const isTablet = bp === "tablet";
@@ -78,8 +97,8 @@ export default function EquipServicesView({
   const closed = requests.filter((r) => r.status === "Declined");
 
   // --- Richer KPIs (SPEC-014) ---
-  const total = ASSETS.length;
-  const deployed = ASSETS.filter((a) => a.status === "Deployed").length;
+  const total = assets.length;
+  const deployed = assets.filter((a) => a.status === "Deployed").length;
   const utilization = Math.round((deployed / total) * 100);
   const totalRequests = requests.length;
   const fulfilled = requests.filter((r) => ["Accepted", "In Transit"].includes(r.status)).length;
@@ -104,6 +123,46 @@ export default function EquipServicesView({
   }).length;
   const fullyCompliant = compliant - expiringSoon;
   const complianceRate = Math.round((compliant / OPERATORS.length) * 100);
+
+  // --- Add Equipment helpers (SPEC-018) ---
+  const photoOptions = assets
+    .map((a) => a.photo)
+    .filter((v, i, arr) => arr.indexOf(v) === i);
+
+  const typeOptions = CATEGORIES.filter((c) => c !== "All");
+
+  const resetAddForm = () => {
+    setNewName(""); setNewType(""); setNewMake(""); setNewModel("");
+    setNewYear(2026); setNewYard(YARDS[0].id); setNewStatus("Available");
+    setNewReadyDate("2026-06-30"); setNewRate(""); setNewCert("none");
+    setNewPhoto(""); setNewSpecs([]);
+  };
+
+  const canSubmitAsset = newName.trim() && newType && newMake.trim() && newModel.trim() && newRate;
+
+  const handleAddEquipment = () => {
+    if (!canSubmitAsset) return;
+    const specsObj: Record<string, string> = {};
+    newSpecs.forEach((s) => { if (s.key.trim()) specsObj[s.key.trim()] = s.value.trim(); });
+    addAsset({
+      name: newName.trim(),
+      type: newType,
+      make: newMake.trim(),
+      model: newModel.trim(),
+      year: newYear,
+      specs: specsObj,
+      location: newYard,
+      status: newStatus,
+      readyDate: newReadyDate,
+      certRequired: newCert === "none" ? null : newCert,
+      photo: newPhoto || photoOptions[0] || "/images/equipment/cat-320-excavator.jpg",
+      rate: Number(newRate),
+    });
+    resetAddForm();
+    setShowAddForm(false);
+    setAddSuccess(true);
+    setTimeout(() => setAddSuccess(false), 3000);
+  };
 
   return (
     <div>
@@ -245,7 +304,7 @@ export default function EquipServicesView({
                 .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
                 .slice(0, 5)
                 .map((m) => {
-                  const asset = ASSETS.find((a) => a.id === m.assetId);
+                  const asset = assets.find((a) => a.id === m.assetId);
                   const dueMs = new Date(m.dueDate + "T00:00:00").getTime();
                   const demoMs = new Date(DEMO_TODAY + "T00:00:00").getTime();
                   const daysUntil = (dueMs - demoMs) / 86400000;
@@ -429,7 +488,176 @@ export default function EquipServicesView({
           </div>
         );
       })()}
-      {tab === "fleet" && <FleetOverview />}
+      {tab === "fleet" && (
+        <div>
+          {/* Add Equipment button + success toast */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            <button
+              onClick={() => { setShowAddForm(!showAddForm); setAddSuccess(false); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "8px 16px", borderRadius: 6, border: "none", cursor: "pointer",
+                fontSize: 13, fontWeight: 600, minHeight: 44,
+                backgroundColor: showAddForm ? S.black70 : S.navy,
+                color: S.white, transition: "all 0.15s",
+              }}
+            >
+              {showAddForm ? "× Cancel" : "+ Add Equipment"}
+            </button>
+            {addSuccess && (
+              <span style={{ fontSize: 13, fontWeight: 600, color: S.submitGreen }}>✓ Equipment added to fleet</span>
+            )}
+          </div>
+
+          {/* Add Equipment form (SPEC-018) */}
+          {showAddForm && (
+            <div style={{ ...cardStyle, padding: isMobile ? 16 : 24, marginBottom: 20 }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: S.black90, marginBottom: 16 }}>Add Equipment to Fleet</div>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 14 }}>
+                {/* Name */}
+                <div>
+                  <label style={labelSt}>Name *</label>
+                  <input style={inputStyle} placeholder="e.g. CAT 336 Excavator" value={newName} onChange={(e) => setNewName(e.target.value)} />
+                </div>
+                {/* Type */}
+                <div>
+                  <label style={labelSt}>Type *</label>
+                  <select style={inputStyle} value={newType} onChange={(e) => setNewType(e.target.value)}>
+                    <option value="">Select type…</option>
+                    {typeOptions.map((t) => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                {/* Make */}
+                <div>
+                  <label style={labelSt}>Make *</label>
+                  <input style={inputStyle} placeholder="e.g. Caterpillar" value={newMake} onChange={(e) => setNewMake(e.target.value)} />
+                </div>
+                {/* Model */}
+                <div>
+                  <label style={labelSt}>Model *</label>
+                  <input style={inputStyle} placeholder="e.g. 336" value={newModel} onChange={(e) => setNewModel(e.target.value)} />
+                </div>
+                {/* Year */}
+                <div>
+                  <label style={labelSt}>Year *</label>
+                  <input style={inputStyle} type="number" min={2000} max={2030} value={newYear} onChange={(e) => setNewYear(Number(e.target.value))} />
+                </div>
+                {/* Yard */}
+                <div>
+                  <label style={labelSt}>Yard *</label>
+                  <select style={inputStyle} value={newYard} onChange={(e) => setNewYard(e.target.value)}>
+                    {YARDS.map((y) => <option key={y.id} value={y.id}>{y.name}</option>)}
+                  </select>
+                </div>
+                {/* Status */}
+                <div>
+                  <label style={labelSt}>Status *</label>
+                  <select style={inputStyle} value={newStatus} onChange={(e) => setNewStatus(e.target.value as "Available" | "In Maintenance")}>
+                    <option value="Available">Available</option>
+                    <option value="In Maintenance">In Maintenance</option>
+                  </select>
+                </div>
+                {/* Ready Date */}
+                <div>
+                  <label style={labelSt}>Ready Date *</label>
+                  <input style={inputStyle} type="date" value={newReadyDate} onChange={(e) => setNewReadyDate(e.target.value)} />
+                </div>
+                {/* Daily Rate */}
+                <div>
+                  <label style={labelSt}>Weekly Rate ($) *</label>
+                  <input style={inputStyle} type="number" min={0} placeholder="e.g. 2200" value={newRate} onChange={(e) => setNewRate(e.target.value)} />
+                </div>
+                {/* Cert Required */}
+                <div>
+                  <label style={labelSt}>Cert Required</label>
+                  <select style={inputStyle} value={newCert} onChange={(e) => setNewCert(e.target.value)}>
+                    <option value="none">None</option>
+                    {CERT_TYPES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                {/* Photo */}
+                <div style={{ gridColumn: isMobile ? undefined : "1 / -1" }}>
+                  <label style={labelSt}>Photo</label>
+                  <select style={inputStyle} value={newPhoto} onChange={(e) => setNewPhoto(e.target.value)}>
+                    <option value="">Use default</option>
+                    {photoOptions.map((p) => {
+                      const filename = p.split("/").pop() || p;
+                      return <option key={p} value={p}>{filename}</option>;
+                    })}
+                  </select>
+                </div>
+              </div>
+
+              {/* Specs key/value pairs */}
+              <div style={{ marginTop: 16 }}>
+                <label style={labelSt}>Specs (optional)</label>
+                {newSpecs.map((s, i) => (
+                  <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center" }}>
+                    <input
+                      style={{ ...inputStyle, flex: 1 }}
+                      placeholder="Key (e.g. weight)"
+                      value={s.key}
+                      onChange={(e) => {
+                        const updated = [...newSpecs];
+                        updated[i] = { ...updated[i], key: e.target.value };
+                        setNewSpecs(updated);
+                      }}
+                    />
+                    <input
+                      style={{ ...inputStyle, flex: 1 }}
+                      placeholder="Value (e.g. 69,200 lb)"
+                      value={s.value}
+                      onChange={(e) => {
+                        const updated = [...newSpecs];
+                        updated[i] = { ...updated[i], value: e.target.value };
+                        setNewSpecs(updated);
+                      }}
+                    />
+                    <button
+                      onClick={() => setNewSpecs(newSpecs.filter((_, j) => j !== i))}
+                      style={{ background: "none", border: "none", cursor: "pointer", color: S.black70, fontSize: 18, padding: 4, minWidth: 28, minHeight: 44 }}
+                      title="Remove spec"
+                    >×</button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => setNewSpecs([...newSpecs, { key: "", value: "" }])}
+                  style={{
+                    background: "none", border: `1px dashed ${S.qdrGray}`, borderRadius: 6,
+                    padding: "6px 14px", cursor: "pointer", fontSize: 12, fontWeight: 600,
+                    color: S.navy, minHeight: 44,
+                  }}
+                >+ Add Spec</button>
+              </div>
+
+              {/* Submit / Cancel */}
+              <div style={{ display: "flex", gap: 10, marginTop: 20, justifyContent: "flex-end" }}>
+                <button
+                  onClick={() => { resetAddForm(); setShowAddForm(false); }}
+                  style={{
+                    padding: "10px 20px", borderRadius: 6, border: `1px solid ${S.qdrGray}`,
+                    cursor: "pointer", fontSize: 13, fontWeight: 600, backgroundColor: S.white,
+                    color: S.black70, minHeight: 44,
+                  }}
+                >Cancel</button>
+                <button
+                  disabled={!canSubmitAsset}
+                  onClick={handleAddEquipment}
+                  style={{
+                    padding: "10px 24px", borderRadius: 6, border: "none",
+                    cursor: canSubmitAsset ? "pointer" : "not-allowed",
+                    fontSize: 13, fontWeight: 700, minHeight: 44,
+                    backgroundColor: canSubmitAsset ? S.submitGreen : S.qdrGray,
+                    color: S.white, transition: "all 0.15s",
+                  }}
+                >Add to Fleet</button>
+              </div>
+            </div>
+          )}
+
+          <FleetOverview assets={assets} />
+        </div>
+      )}
       {tab === "active" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {active.length === 0 && <Empty msg="No active requests" />}
@@ -455,3 +683,8 @@ function Empty({ msg }: { msg: string }) {
     <div style={{ textAlign: "center", padding: 48, color: S.darkGray, fontSize: 13 }}>{msg}</div>
   );
 }
+
+const labelSt: React.CSSProperties = {
+  display: "block", fontSize: 11, fontWeight: 700, color: S.black70,
+  textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4,
+};
