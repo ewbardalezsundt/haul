@@ -77,12 +77,20 @@ export default function EquipServicesView({
   const active = requests.filter((r) => ["Accepted", "In Transit"].includes(r.status));
   const closed = requests.filter((r) => r.status === "Declined");
 
-  const stats = [
-    { label: "Total Fleet", value: ASSETS.length, accent: S.red },
-    { label: "Available", value: ASSETS.filter((a) => a.status === "Available").length, accent: S.green },
-    { label: "Deployed", value: ASSETS.filter((a) => a.status === "Deployed").length, accent: S.navy },
-    { label: "In Maintenance", value: ASSETS.filter((a) => a.status === "In Maintenance").length, accent: S.yellow },
-    { label: "Pending Requests", value: pending.length, accent: S.blue },
+  // --- Richer KPIs (SPEC-014) ---
+  const total = ASSETS.length;
+  const deployed = ASSETS.filter((a) => a.status === "Deployed").length;
+  const utilization = Math.round((deployed / total) * 100);
+  const totalRequests = requests.length;
+  const fulfilled = requests.filter((r) => ["Accepted", "In Transit"].includes(r.status)).length;
+  const fillRate = totalRequests > 0 ? Math.round((fulfilled / totalRequests) * 100) : 0;
+
+  // Mock trend data — hardcoded per hackathon rules (no historical data)
+  const stats: { label: string; value: string | number; sub: string; accent: string; trend?: string }[] = [
+    { label: "Internal Fill Rate", value: `${fillRate}%`, sub: "This Month", accent: S.red, trend: "\u25B2 9% vs last month" },
+    { label: "Active Requests", value: pending.length + active.length, sub: `${pending.length} Pending Approval`, accent: S.navy },
+    { label: "Equipment Utilization", value: `${utilization}%`, sub: "This Month", accent: S.green, trend: "\u25B2 7% vs last month" },
+    { label: "Total Fleet", value: total, sub: "Total Assets", accent: S.black80 },
   ];
 
   return (
@@ -95,19 +103,18 @@ export default function EquipServicesView({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : isTablet ? "repeat(3, 1fr)" : "repeat(5, 1fr)",
+          gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : isTablet ? "repeat(2, 1fr)" : "repeat(4, 1fr)",
           gap: 10,
           marginBottom: 24,
         }}
       >
-        {stats.map((s, idx) => (
+        {stats.map((s) => (
           <div
             key={s.label}
             style={{
               ...cardStyle,
               borderTop: `3px solid ${s.accent}`,
               padding: isMobile ? 12 : 16,
-              ...(isMobile && idx === stats.length - 1 ? { gridColumn: "1 / -1" } : {}),
             }}
           >
             <div
@@ -124,6 +131,14 @@ export default function EquipServicesView({
             <div style={{ fontSize: isMobile ? 20 : 28, fontWeight: 800, color: S.black90, marginTop: 4 }}>
               {s.value}
             </div>
+            <div style={{ fontSize: 11, color: S.black70, marginTop: 2 }}>
+              {s.sub}
+            </div>
+            {s.trend && (
+              <div style={{ fontSize: 11, fontWeight: 600, color: s.trend.includes("\u25B2") ? "#00A200" : S.red, marginTop: 4 }}>
+                {s.trend}
+              </div>
+            )}
           </div>
         ))}
       </div>
