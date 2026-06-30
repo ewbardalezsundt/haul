@@ -8,6 +8,54 @@ import { Btn, cardStyle, inputStyle } from "@/components/ui";
 import RequestCard from "@/components/RequestCard";
 import FleetOverview from "@/components/FleetOverview";
 
+// Demo reference date — matches seed data window so 2+ groups are visible
+const DEMO_TODAY = "2026-07-02";
+
+function groupByTimeHorizon(requests: EquipmentRequest[]) {
+  const today = DEMO_TODAY;
+  const d = new Date(today + "T00:00:00");
+  d.setDate(d.getDate() + 7);
+  const weekEnd = d.toISOString().slice(0, 10);
+
+  const sorted = [...requests].sort((a, b) => a.startDate.localeCompare(b.startDate));
+
+  return {
+    today: sorted.filter((r) => r.startDate <= today),
+    thisWeek: sorted.filter((r) => r.startDate > today && r.startDate <= weekEnd),
+    future: sorted.filter((r) => r.startDate > weekEnd),
+  };
+}
+
+function GroupHeader({ label, count, color }: { label: string; count: number; color: string }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "8px 0",
+        borderLeft: `3px solid ${color}`,
+        paddingLeft: 12,
+        marginTop: 8,
+      }}
+    >
+      <span style={{ fontSize: 13, fontWeight: 700, color: S.black90 }}>{label}</span>
+      <span
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          backgroundColor: color + "20",
+          color,
+          borderRadius: 10,
+          padding: "2px 8px",
+        }}
+      >
+        {count}
+      </span>
+    </div>
+  );
+}
+
 interface EquipServicesViewProps {
   requests: EquipmentRequest[];
   updateRequestStatus: (reqId: string, status: string, reason?: string, reasonCode?: string) => void;
@@ -196,19 +244,38 @@ export default function EquipServicesView({
       )}
 
       {/* Tab content */}
-      {tab === "queue" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {pending.length === 0 && <Empty msg="No pending requests" />}
-          {pending.map((req) => (
-            <RequestCard
-              key={req.id}
-              req={req}
-              onAccept={() => updateRequestStatus(req.id, "Accepted")}
-              onDecline={() => setDeclineReqId(req.id)}
-            />
-          ))}
-        </div>
-      )}
+      {tab === "queue" && (() => {
+        const groups = groupByTimeHorizon(pending);
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {pending.length === 0 && <Empty msg="No pending requests" />}
+            {groups.today.length > 0 && (
+              <>
+                <GroupHeader label="Today" count={groups.today.length} color={S.red} />
+                {groups.today.map((req) => (
+                  <RequestCard key={req.id} req={req} onAccept={() => updateRequestStatus(req.id, "Accepted")} onDecline={() => setDeclineReqId(req.id)} />
+                ))}
+              </>
+            )}
+            {groups.thisWeek.length > 0 && (
+              <>
+                <GroupHeader label="This Week" count={groups.thisWeek.length} color={S.yellow} />
+                {groups.thisWeek.map((req) => (
+                  <RequestCard key={req.id} req={req} onAccept={() => updateRequestStatus(req.id, "Accepted")} onDecline={() => setDeclineReqId(req.id)} />
+                ))}
+              </>
+            )}
+            {groups.future.length > 0 && (
+              <>
+                <GroupHeader label="Future" count={groups.future.length} color={S.navy} />
+                {groups.future.map((req) => (
+                  <RequestCard key={req.id} req={req} onAccept={() => updateRequestStatus(req.id, "Accepted")} onDecline={() => setDeclineReqId(req.id)} />
+                ))}
+              </>
+            )}
+          </div>
+        );
+      })()}
       {tab === "fleet" && <FleetOverview />}
       {tab === "active" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

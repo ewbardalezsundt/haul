@@ -274,7 +274,9 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
                     onChange={(e) => setForm({ ...form, fuelFreq: e.target.value })}
                     style={inputStyle}
                   >
-                    <option>Daily</option>
+                    <option>Daily — Morning</option>
+                    <option>Daily — Evening</option>
+                    <option>Every Other Day</option>
                     <option>Weekly</option>
                     <option>Bi-Weekly</option>
                     <option>As Needed</option>
