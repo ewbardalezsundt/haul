@@ -2,19 +2,49 @@
 
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
-import type { Asset } from "@/lib/data";
+import type { Asset, EquipmentRequest } from "@/lib/data";
 import { ASSETS } from "@/lib/data";
 import { getLocation, getCompatibleAttachments, getSubstitutes, getTransitRange } from "@/lib/helpers";
 import { StatusBadge, Btn, BackBtn, SectionLabel, InfoRow, cardStyle } from "@/components/ui";
 
+const DEMO_TODAY = "2026-07-02";
+
 interface AssetDetailProps {
   asset: Asset;
+  requests: EquipmentRequest[];
   onBack: () => void;
   onRequest: () => void;
   onSelectAsset?: (asset: Asset) => void;
 }
 
-export default function AssetDetail({ asset, onBack, onRequest, onSelectAsset }: AssetDetailProps) {
+interface TimelineBlock {
+  date: string;
+  status: "available" | "committed" | "pending" | "maintenance";
+}
+
+function getAvailabilityTimeline(asset: Asset, requests: EquipmentRequest[]): TimelineBlock[] {
+  const base = new Date(DEMO_TODAY + "T00:00:00");
+  const commitments = requests.filter(
+    (r) => r.assetId === asset.id && ["Accepted", "In Transit", "Pending"].includes(r.status)
+  );
+  const blocks: TimelineBlock[] = [];
+  for (let day = 0; day < 30; day++) {
+    const d = new Date(base);
+    d.setDate(d.getDate() + day);
+    const ds = d.toISOString().slice(0, 10);
+    const hit = commitments.find((r) => ds >= r.startDate && ds <= r.endDate);
+    let status: TimelineBlock["status"] = "available";
+    if (asset.status === "In Maintenance" && asset.readyDate > ds) {
+      status = "maintenance";
+    } else if (hit) {
+      status = hit.status === "Pending" ? "pending" : "committed";
+    }
+    blocks.push({ date: ds, status });
+  }
+  return blocks;
+}
+
+export default function AssetDetail({ asset, requests, onBack, onRequest, onSelectAsset }: AssetDetailProps) {
   const bp = useBreakpoint();
   const isMobile = bp === "mobile";
   const compatible = getCompatibleAttachments(asset.type);
@@ -91,6 +121,89 @@ export default function AssetDetail({ asset, onBack, onRequest, onSelectAsset }:
                   return range ? <InfoRow label="Est. Transit" value={`${range} depending on job site`} /> : null;
                 })()}
               </div>
+
+              {/* 30-Day Availability Timeline (SPEC-017) */}
+              {(() => {
+                const timeline = getAvailabilityTimeline(asset, requests);
+                const colorMap: Record<TimelineBlock["status"], string> = {
+                  available: S.lightGreen,
+                  committed: S.navy,
+                  pending: S.yellow,
+                  maintenance: S.darkYellow,
+                };
+                return (
+                  <div style={{ marginTop: 20 }}>
+                    <SectionLabel>30-Day Availability</SectionLabel>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 1,
+                        borderRadius: 6,
+                        overflow: "hidden",
+                        height: 28,
+                        border: `1px solid ${S.qdrGray}`,
+                      }}
+                    >
+                      {timeline.map((block, i) => (
+                        <div
+                          key={i}
+                          title={`${new Date(block.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}: ${block.status}`}
+                          style={{
+                            flex: 1,
+                            backgroundColor: colorMap[block.status],
+                            cursor: "default",
+                            transition: "opacity 0.1s",
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.75"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+                        />
+                      ))}
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginTop: 4,
+                        fontSize: 10,
+                        color: S.darkGray,
+                      }}
+                    >
+                      <span>Today</span>
+                      <span>+30 days</span>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 12,
+                        marginTop: 6,
+                        fontSize: 11,
+                        color: S.black70,
+                      }}
+                    >
+                      {[
+                        { color: S.lightGreen, label: "Available" },
+                        { color: S.navy, label: "Committed" },
+                        { color: S.yellow, label: "Pending" },
+                        { color: S.darkYellow, label: "Maintenance" },
+                      ].map((item) => (
+                        <span key={item.label} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                          <span
+                            style={{
+                              display: "inline-block",
+                              width: 10,
+                              height: 10,
+                              borderRadius: 2,
+                              backgroundColor: item.color,
+                            }}
+                          />
+                          {item.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
               {compatible.length > 0 && (
                 <div style={{ marginTop: 20 }}>
                   <SectionLabel>Compatible Attachments</SectionLabel>
