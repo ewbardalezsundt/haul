@@ -199,6 +199,23 @@ export const CATEGORY_CARDS: { type: string; label: string; image: string }[] = 
 
 // ── Filter categories ───────────────────────────────────
 
+// ── Upcoming Maintenance Schedule (SPEC-016) ────────────
+
+export interface MaintenanceSchedule {
+  assetId: string;
+  type: "PM Service" | "Inspection" | "Repair" | "Cert Renewal";
+  dueDate: string;
+  notes?: string;
+}
+
+export const UPCOMING_MAINTENANCE: MaintenanceSchedule[] = [
+  { assetId: "asset-13", type: "PM Service", dueDate: "2026-07-04", notes: "500-hour service" },
+  { assetId: "asset-2", type: "PM Service", dueDate: "2026-07-09" },
+  { assetId: "asset-19", type: "Inspection", dueDate: "2026-07-11" },
+  { assetId: "asset-8", type: "PM Service", dueDate: "2026-07-14" },
+  { assetId: "asset-6", type: "Inspection", dueDate: "2026-07-17" },
+];
+
 export const CATEGORIES = [
   "All", "Excavator", "Skid Steer", "Loader", "Crane",
   "Generator", "Dozer", "Telehandler", "Compactor", "Light Tower",
