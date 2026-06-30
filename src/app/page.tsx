@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
-import { ASSETS, type EquipmentRequest } from "@/lib/data";
+import { ASSETS, INITIAL_REQUESTS, type EquipmentRequest } from "@/lib/data";
 import { loadRequests, saveRequests, loadNextReqNum, saveNextReqNum, resetStorage } from "@/lib/storage";
 import FieldView from "@/components/FieldView";
 import EquipServicesView from "@/components/EquipServicesView";
@@ -12,10 +12,20 @@ export default function Home() {
   const bp = useBreakpoint();
   const isMobile = bp === "mobile";
   const [view, setView] = useState<"field" | "equip">("field");
-  const [requests, setRequests] = useState<EquipmentRequest[]>(() => loadRequests());
-  const [nextReqNum, setNextReqNum] = useState(() => loadNextReqNum());
+  const [requests, setRequests] = useState<EquipmentRequest[]>(INITIAL_REQUESTS);
+  const [nextReqNum, setNextReqNum] = useState(8);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [notifications, setNotifications] = useState<string[]>([]);
   const prevRequestsRef = useRef<EquipmentRequest[]>(requests);
+
+  // Hydrate from localStorage after client-side mount
+  useEffect(() => {
+    const stored = loadRequests();
+    const storedSeq = loadNextReqNum();
+    setRequests(stored);
+    setNextReqNum(storedSeq);
+    setIsHydrated(true);
+  }, []);
 
   // Auto-dismiss toasts after 5 seconds
   useEffect(() => {
@@ -147,10 +157,16 @@ export default function Home() {
 
       {/* ─── Content ─── */}
       <main style={{ maxWidth: 1200, margin: "0 auto", padding: "24px 24px" }}>
-        {view === "field" ? (
-          <FieldView requests={requests} addRequest={addRequest} />
+        {isHydrated ? (
+          view === "field" ? (
+            <FieldView requests={requests} addRequest={addRequest} />
+          ) : (
+            <EquipServicesView requests={requests} updateRequestStatus={updateRequestStatus} />
+          )
         ) : (
-          <EquipServicesView requests={requests} updateRequestStatus={updateRequestStatus} />
+          <div style={{ minHeight: 400, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <p style={{ color: S.black70 }}>Loading...</p>
+          </div>
         )}
       </main>
 

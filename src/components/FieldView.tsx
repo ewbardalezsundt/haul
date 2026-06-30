@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
-import { ASSETS, CATEGORIES, MOCK_USER, type EquipmentRequest } from "@/lib/data";
+import { ASSETS, CATEGORIES, CATEGORY_CARDS, MOCK_USER, type EquipmentRequest } from "@/lib/data";
 import { getLocation } from "@/lib/helpers";
-import { StatusBadge, Btn, cardStyle, inputStyle } from "@/components/ui";
+import { StatusBadge, Btn, SectionLabel, cardStyle, inputStyle } from "@/components/ui";
 import AssetDetail from "@/components/AssetDetail";
 import OrderWizard from "@/components/OrderWizard";
 import OrderConfirmation from "@/components/OrderConfirmation";
@@ -32,6 +32,17 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
   const [confirmReqId, setConfirmReqId] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
   const [locationFilter, setLocationFilter] = useState<string | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Hydrate on client-side only to avoid time-based mismatches
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  const requestCount = useMemo(
+    () => requests.filter((r) => r.requestedBy === "Tom Bradley").length,
+    [requests]
+  );
 
   const filtered = useMemo(() => {
     return ASSETS.filter((a) => {
@@ -102,7 +113,13 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
       >
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: S.black90, margin: 0 }}>
-            {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}, {MOCK_USER.name}
+            {isHydrated
+              ? new Date().getHours() < 12
+                ? "Good morning"
+                : new Date().getHours() < 17
+                  ? "Good afternoon"
+                  : "Good evening"
+              : "Welcome"}, {MOCK_USER.name}
           </h1>
           <p style={{ fontSize: 13, color: S.black70, marginTop: 4 }}>
             What equipment do you need today?
@@ -127,9 +144,85 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
               padding: "2px 8px",
             }}
           >
-            {requests.filter((r) => r.requestedBy === "Tom Bradley").length}
+            {requestCount}
           </span>
         </Btn>
+      </div>
+
+      {/* Browse by Category Cards */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <SectionLabel>Browse by Category</SectionLabel>
+          <button
+            onClick={() => setCategory("All")}
+            style={{
+              fontSize: 12,
+              color: S.navy,
+              border: "none",
+              background: "none",
+              cursor: "pointer",
+              fontWeight: 600,
+              padding: 0,
+              marginBottom: 12,
+            }}
+          >
+            View all
+          </button>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            gap: 12,
+            overflowX: "auto",
+            paddingBottom: 8,
+            WebkitOverflowScrolling: "touch" as const,
+          }}
+        >
+          {CATEGORY_CARDS.map((cat) => (
+            <button
+              key={cat.type}
+              onClick={() => setCategory(cat.type)}
+              style={{
+                flexShrink: 0,
+                width: isMobile ? 90 : 110,
+                border: category === cat.type ? `2px solid ${S.navy}` : `1px solid ${S.qdrGray}`,
+                borderRadius: 10,
+                overflow: "hidden",
+                cursor: "pointer",
+                backgroundColor: S.white,
+                padding: 0,
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={(e) => {
+                if (category !== cat.type) {
+                  e.currentTarget.style.borderColor = S.navy;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (category !== cat.type) {
+                  e.currentTarget.style.borderColor = S.qdrGray;
+                }
+              }}
+            >
+              <img
+                src={cat.image}
+                alt={cat.label}
+                style={{ width: "100%", height: isMobile ? 60 : 70, objectFit: "cover" }}
+              />
+              <div
+                style={{
+                  padding: "6px 8px",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: S.black90,
+                  textAlign: "center" as const,
+                }}
+              >
+                {cat.label}
+              </div>
+            </button>
+          ))}
+        </div>
         </div>
       </div>
 

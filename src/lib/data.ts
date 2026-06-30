@@ -183,6 +183,19 @@ export const TRANSIT_MINUTES: Record<string, Record<string, number>> = {
   "yard-4": { "job-1": 25, "job-2": 30, "job-3": 115, "job-4": 10, "job-5": 20 },
 };
 
+// ── Category Cards for Browse View ────────────────────────
+
+export const CATEGORY_CARDS: { type: string; label: string; image: string }[] = [
+  { type: "Excavator", label: "Excavators", image: "/images/equipment/cat-320-excavator.jpg" },
+  { type: "Skid Steer", label: "Skid Steers", image: "/images/equipment/cat-259d-skidsteer.jpg" },
+  { type: "Loader", label: "Loaders", image: "/images/equipment/cat-950m-loader.jpg" },
+  { type: "Crane", label: "Cranes", image: "/images/equipment/liebherr-ltm1060-crane.jpg" },
+  { type: "Dozer", label: "Dozers", image: "/images/equipment/cat-d6-dozer.jpg" },
+  { type: "Boom Lift", label: "Boom Lifts", image: "/images/equipment/jlg-600s-boomlift.jpg" },
+  { type: "Generator", label: "Generators", image: "/images/equipment/cat-xq200-generator.jpg" },
+  { type: "Compactor", label: "Compaction", image: "/images/equipment/cat-cs56b-compactor.jpg" },
+];
+
 // ── Filter categories ───────────────────────────────────
 
 export const CATEGORIES = [
