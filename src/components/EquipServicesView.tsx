@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
-import { ASSETS, type EquipmentRequest } from "@/lib/data";
+import { ASSETS, DECLINE_REASONS, type EquipmentRequest } from "@/lib/data";
 import { Btn, cardStyle, inputStyle } from "@/components/ui";
 import RequestCard from "@/components/RequestCard";
 import FleetOverview from "@/components/FleetOverview";
 
 interface EquipServicesViewProps {
   requests: EquipmentRequest[];
-  updateRequestStatus: (reqId: string, status: string, reason?: string) => void;
+  updateRequestStatus: (reqId: string, status: string, reason?: string, reasonCode?: string) => void;
 }
 
 export default function EquipServicesView({
@@ -19,6 +19,7 @@ export default function EquipServicesView({
 }: EquipServicesViewProps) {
   const [tab, setTab] = useState("queue");
   const [declineReqId, setDeclineReqId] = useState<string | null>(null);
+  const [declineCode, setDeclineCode] = useState("");
   const [declineReason, setDeclineReason] = useState("");
   const bp = useBreakpoint();
   const isMobile = bp === "mobile";
@@ -138,13 +139,29 @@ export default function EquipServicesView({
           }}
         >
           <div style={{ ...cardStyle, maxWidth: isMobile ? "calc(100vw - 32px)" : 440, width: "100%", padding: isMobile ? 20 : 24 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: S.black90, margin: "0 0 12px" }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: S.black90, margin: "0 0 16px" }}>
               Decline Request {declineReqId}
             </h3>
+            <label style={{ fontSize: 12, fontWeight: 600, color: S.black80, display: "block", marginBottom: 4 }}>
+              Reason <span style={{ color: S.red }}>*</span>
+            </label>
+            <select
+              value={declineCode}
+              onChange={(e) => setDeclineCode(e.target.value)}
+              style={{ ...inputStyle, marginBottom: 12, cursor: "pointer" }}
+            >
+              <option value="">Select a reason...</option>
+              {DECLINE_REASONS.map((r) => (
+                <option key={r.code} value={r.code}>{r.label}</option>
+              ))}
+            </select>
+            <label style={{ fontSize: 12, fontWeight: 600, color: S.black80, display: "block", marginBottom: 4 }}>
+              Additional notes (optional)
+            </label>
             <textarea
               value={declineReason}
               onChange={(e) => setDeclineReason(e.target.value)}
-              placeholder="Reason for declining (e.g., asset in maintenance)..."
+              placeholder="Provide details..."
               rows={3}
               style={{ ...inputStyle, resize: "vertical" as const }}
             />
@@ -153,6 +170,7 @@ export default function EquipServicesView({
                 variant="secondary"
                 onClick={() => {
                   setDeclineReqId(null);
+                  setDeclineCode("");
                   setDeclineReason("");
                 }}
                 style={isMobile ? { width: "100%", order: 2 } : undefined}
@@ -161,9 +179,11 @@ export default function EquipServicesView({
               </Btn>
               <Btn
                 variant="destructive"
+                disabled={!declineCode}
                 onClick={() => {
-                  updateRequestStatus(declineReqId, "Declined", declineReason);
+                  updateRequestStatus(declineReqId!, "Declined", declineReason || undefined, declineCode);
                   setDeclineReqId(null);
+                  setDeclineCode("");
                   setDeclineReason("");
                 }}
                 style={isMobile ? { width: "100%", order: 1 } : undefined}

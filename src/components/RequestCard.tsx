@@ -2,7 +2,7 @@
 
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
-import { ASSETS, ATTACHMENTS, JOB_SITES, type EquipmentRequest } from "@/lib/data";
+import { ASSETS, ATTACHMENTS, DECLINE_REASONS, JOB_SITES, type EquipmentRequest } from "@/lib/data";
 import { getOperatorCertStatus } from "@/lib/helpers";
 import { StatusBadge, Btn, CertIndicator, cardStyle } from "@/components/ui";
 
@@ -104,7 +104,7 @@ export default function RequestCard({ req, onAccept, onDecline }: RequestCardPro
           <div style={{ marginTop: 8 }}>
             <CertIndicator status={cert.status} label={cert.label} />
           </div>
-          {req.declineReason && (
+          {(req.declineReasonCode || req.declineReason) && (
             <div
               style={{
                 fontSize: 11,
@@ -116,7 +116,13 @@ export default function RequestCard({ req, onAccept, onDecline }: RequestCardPro
                 borderRadius: 4,
               }}
             >
-              Declined: {req.declineReason}
+              {req.declineReasonCode && (
+                <span style={{ fontWeight: 700 }}>
+                  {DECLINE_REASONS.find((r) => r.code === req.declineReasonCode)?.label ?? req.declineReasonCode}
+                </span>
+              )}
+              {req.declineReasonCode && req.declineReason && " \u2014 "}
+              {req.declineReason}
             </div>
           )}
         </div>

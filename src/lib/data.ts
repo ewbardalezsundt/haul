@@ -59,7 +59,19 @@ export interface EquipmentRequest {
   status: "Pending" | "Accepted" | "Declined" | "In Transit";
   submittedAt: string;
   declineReason?: string;
+  declineReasonCode?: string;
 }
+
+// ── Decline Reason Codes ────────────────────────────────
+
+export const DECLINE_REASONS = [
+  { code: "maintenance", label: "Asset in Maintenance" },
+  { code: "unavailable_date", label: "Unavailable for Requested Dates" },
+  { code: "cert_issue", label: "Operator Certification Issue" },
+  { code: "transport", label: "Transport Constraint" },
+  { code: "better_substitute", label: "Better Substitute Available" },
+  { code: "other", label: "Other" },
+] as const;
 
 // ── Yards ───────────────────────────────────────────────
 
@@ -138,7 +150,7 @@ export const INITIAL_REQUESTS: EquipmentRequest[] = [
   { id: "REQ-001", assetId: "asset-1", jobSiteId: "job-1", requestedBy: "Tom Bradley", startDate: "2025-07-02", endDate: "2025-07-16", attachments: ["att-1"], fueling: true, fuelFreq: "Weekly", operatorId: "op-1", status: "Pending", submittedAt: "2025-06-28T09:15:00" },
   { id: "REQ-002", assetId: "asset-5", jobSiteId: "job-2", requestedBy: "Carlos Vega", startDate: "2025-07-01", endDate: "2025-07-14", attachments: ["att-4"], fueling: false, fuelFreq: null, operatorId: "op-3", status: "Accepted", submittedAt: "2025-06-27T14:30:00" },
   { id: "REQ-003", assetId: "asset-11", jobSiteId: "job-3", requestedBy: "Rachel Kim", startDate: "2025-07-05", endDate: "2025-08-05", attachments: [], fueling: true, fuelFreq: "Bi-Weekly", operatorId: null, status: "Pending", submittedAt: "2025-06-28T11:00:00" },
-  { id: "REQ-004", assetId: "asset-13", jobSiteId: "job-4", requestedBy: "Derek Owens", startDate: "2025-07-01", endDate: "2025-07-21", attachments: [], fueling: true, fuelFreq: "Weekly", operatorId: "op-4", status: "Declined", submittedAt: "2025-06-26T08:45:00", declineReason: "Asset in maintenance until 7/5 — rescheduled to 7/7 start" },
+  { id: "REQ-004", assetId: "asset-13", jobSiteId: "job-4", requestedBy: "Derek Owens", startDate: "2025-07-01", endDate: "2025-07-21", attachments: [], fueling: true, fuelFreq: "Weekly", operatorId: "op-4", status: "Declined", submittedAt: "2025-06-26T08:45:00", declineReasonCode: "maintenance", declineReason: "Asset not available until 7/5 — rescheduled to 7/7 start" },
   { id: "REQ-005", assetId: "asset-6", jobSiteId: "job-5", requestedBy: "Anna Lopez", startDate: "2025-07-10", endDate: "2025-07-24", attachments: ["att-4", "att-7"], fueling: false, fuelFreq: null, operatorId: "op-3", status: "Accepted", submittedAt: "2025-06-25T16:20:00" },
   { id: "REQ-006", assetId: "asset-9", jobSiteId: "job-1", requestedBy: "Tom Bradley", startDate: "2025-07-08", endDate: "2025-07-22", attachments: [], fueling: true, fuelFreq: "Weekly", operatorId: "op-2", status: "Pending", submittedAt: "2025-06-29T07:30:00" },
   { id: "REQ-007", assetId: "asset-7", jobSiteId: "job-2", requestedBy: "Carlos Vega", startDate: "2025-07-03", endDate: "2025-07-17", attachments: ["att-3"], fueling: true, fuelFreq: "Weekly", operatorId: "op-4", status: "In Transit", submittedAt: "2025-06-24T10:00:00" },

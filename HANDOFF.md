@@ -26,6 +26,7 @@ src/
 │   ├── theme.ts              ← Sundt brand color tokens (S.red, S.navy, etc.)
 │   ├── data.ts               ← All mock data with TypeScript interfaces
 │   ├── helpers.ts            ← getLocation, getCompatibleAttachments, getOperatorCertStatus
+│   ├── storage.ts            ← localStorage persistence (load/save requests & sequence num)
 │   └── useBreakpoint.ts      ← Responsive hook: mobile/tablet/desktop
 └── components/
     ├── ui.tsx                ← Shared: Btn, StatusBadge, BackBtn, SectionLabel, InfoRow, CertIndicator
@@ -177,12 +178,12 @@ HAUL builds on an original Equipment Services pitch (`ESD_Spark_Idea_2.pptx`) wi
 
 **Priority targets (from feature review June 25):**
 - [ ] **Substitute Recommendations (P0)** — When an asset is deployed/in maintenance, show a "Similar Available Equipment" section on AssetDetail. Filter by same `type`, sort by proximity and spec similarity. This is the "Amazon-like" moment — high demo impact, low effort.
-- [ ] **localStorage Persistence (P0)** — Wrap requests state in `localStorage` so a browser refresh doesn't kill the demo. ~20 min effort. Hide behind a service abstraction for future API replacement.
+- [x] ~~**localStorage Persistence (P0)**~~ **Done.** — Requests and nextReqNum persisted to `localStorage` via `src/lib/storage.ts`. State survives browser refresh. `useEffect` syncs on every change. `window.__resetHaul()` resets to seed data. Falls back gracefully if localStorage disabled. (SPEC-003)
 - [x] ~~**Personalized Greeting (P0)**~~ **Done.** — "Good morning, Alex" + "What equipment do you need today?" at top of Field View. Hardcoded mock user per hackathon rules (no auth). ~10 min. Matches pitch deck Slide 6. (SPEC-011)
 - [ ] **Browse by Category Cards (P0)** — Horizontal scrollable row of 8 category image cards above the catalog grid. Tapping filters. Reuses existing photos. ~1 hr. Matches pitch deck Slide 6. (SPEC-012)
 - [ ] **Active Requests on Home Screen (P0)** — Show 1-2 active requests on the catalog page with status badges. "View all" links to My Requests. ~30 min. Matches pitch deck Slide 6. (SPEC-013)
 - [ ] **Richer KPIs (P0)** — Internal Fill Rate %, Equipment Utilization %, Active Requests, Total Fleet. Mock trend arrows. ~30 min. Matches pitch deck Slide 8. (SPEC-014)
-- [ ] **Structured Decline Reasons (P1)** — Add a reason code dropdown to the existing decline modal (Maintenance, Unavailable Date, Cert Issue, Transport Constraint, Better Substitute) plus optional notes. Nearly free since the modal already exists.
+- [x] ~~**Structured Decline Reasons (P1)**~~ **Done.** — Dropdown with 6 reason codes (Maintenance, Unavailable Date, Cert Issue, Transport Constraint, Better Substitute, Other) added to decline modal. Decline button disabled until a code is selected. Free-text notes still available. History tab shows bold reason label + optional notes. Seed REQ-004 updated with structured code. (SPEC-004)
 - [ ] **Request Operator Service (P1)** — Add "Sundt-provided operator requested" toggle to the Services step of the Order Wizard, alongside fueling. Follows the same UI pattern. Especially realistic for cranes and excavators.
 - [ ] **Delivery Details (P1)** — Add optional fields to the Order Wizard: delivery contact, gate/access notes, drop zone, site hours, unloading support needed. Reduces follow-up phone calls.
 - [ ] **Dispatch Queue Grouping (P1)** — Add "Today / This Week / Future" date-based grouping headers to the Equipment Services request queue. Sort within each group by start date.
@@ -206,7 +207,7 @@ HAUL is a field-use app — supervisors and foremen will access it from phones a
 - [x] ~~**Mobile-Responsive Field View**~~ **Done.** All 11 components refactored with useBreakpoint() hook. (SPEC-001) — Refactor all Field View layouts (catalog grid, asset detail, order wizard, My Requests) for phones and tablets. Catalog collapses to single-column card list on small viewports. Order wizard steps go full-screen on mobile. All touch targets minimum 44px. Equipment Services view is lower priority (desk users) but must not break on tablet.
 - [x] ~~**Real Equipment Photography**~~ — **Done.** 23 equipment photos placed in `public/images/equipment/` (17 original heavy asset types + 6 expanded categories from ESD Spark Idea: Backhoe, Boom Lift, Reach Fork, Trench Plate, Camera, Specialty Tool). All asset `photo` fields in `data.ts` updated from emojis to image paths. Catalog cards show full-width images with status badge overlay; detail, wizard, request, and fleet views show appropriately-sized thumbnails. See `HAUL_Image_Requirements.md` for the full manifest. For production, replace with actual fleet photos.
 - [ ] **Substitute Recommendations** — Show "Similar Available Equipment" on AssetDetail when an asset is deployed/in maintenance. Filter by same type, sort by proximity and spec similarity. High demo impact, low effort.
-- [ ] **Demo-Safe Persistence (localStorage)** — Wrap requests state in `localStorage` so browser refresh doesn't lose data. Hide behind a service abstraction for future API replacement.
+- [x] ~~**Demo-Safe Persistence (localStorage)**~~ **Done.** — `src/lib/storage.ts` abstracts localStorage behind load/save functions. `page.tsx` uses lazy `useState` initializers and `useEffect` sync. `window.__resetHaul()` available in console. Graceful fallback if localStorage disabled. (SPEC-003)
 
 #### P1 — High-Value Additions for Initial Release
 
@@ -214,7 +215,7 @@ HAUL is a field-use app — supervisors and foremen will access it from phones a
 - [ ] **Status Change Notifications** — Toast/banner notification when a request status changes (e.g., "Your request REQ-008 was accepted — CAT 320 arriving July 3"). For demo, trigger on view-switch. For production, implement as browser push notifications so field users get updates without the app open.
 - [ ] **Estimated Delivery / Transit Time** — Show estimated arrival time on each asset based on yard-to-jobsite distance. Hardcode transit estimates for the 4 yards × 5 job sites matrix (20 combinations). Display as "Est. arrival: ~2 hours from Tucson Yard" on asset detail and order review screens.
 - [ ] **Delivery Details in Order Wizard** — Add optional delivery fields: contact name/phone, gate/access notes, preferred drop zone, site hours, unloading support needed. Reduces follow-up phone calls significantly.
-- [ ] **Structured Decline / Delay Reasons** — Add reason code dropdown to existing decline modal (Maintenance, Unavailable Date, Cert Issue, Transport Constraint, Better Substitute) plus optional notes. Turns declines into useful operational data.
+- [x] ~~**Structured Decline / Delay Reasons**~~ **Done.** — 6-code dropdown (Maintenance, Unavailable Date, Cert Issue, Transport Constraint, Better Substitute, Other) + optional notes. `DECLINE_REASONS` in `data.ts`, `declineReasonCode` on `EquipmentRequest`. History shows bold label + notes. (SPEC-004)
 - [ ] **Request Operator Service Option** — Add "Sundt-provided operator requested" toggle to the Services step of the Order Wizard alongside fueling. Relevant for cranes, excavators, and specialty assets.
 - [ ] **Dispatch-Oriented Queue Grouping** — Add "Today / This Week / Future" grouping headers to Equipment Services request queue. Sort within each group by requested start date.
 
@@ -238,6 +239,7 @@ HAUL is a field-use app — supervisors and foremen will access it from phones a
 |---|---|
 | `C:\Repo\haul\haul` | Project root — run `npm run dev` here |
 | `src/lib/data.ts` | All mock data + TypeScript interfaces — edit here to change seed data |
+| `src/lib/storage.ts` | localStorage persistence — load/save requests & sequence number, resetStorage() |
 | `src/lib/theme.ts` | Sundt brand tokens — single source of truth for colors |
 | `src/app/page.tsx` | App entry point — header, nav, state management |
 | `public/images/` | Sundt logo + 17 equipment photos (see `HAUL_Image_Requirements.md` for manifest) |
@@ -251,4 +253,4 @@ HAUL is a field-use app — supervisors and foremen will access it from phones a
 
 ---
 
-*Last updated: June 30, 2026. SPEC-001 (responsive layout) and SPEC-011 (personalized greeting) implemented. Pitch deck (HAUL_FINAL_SLIDES_2.pdf) reviewed — 7 new features identified and specced (SPEC-011–017). P0 hackathon targets now include: greeting, category cards, active requests on home, richer KPIs (all from Slide 6/8 mockups). P1 adds: cert compliance, maintenance table, availability calendar. All features use mock data per hackathon rules (no auth).*
+*Last updated: June 30, 2026. SPEC-004 (structured decline reasons) implemented — dropdown with 6 reason codes in decline modal. SPEC-003 (localStorage persistence) implemented — demo survives browser refresh. SPEC-001 (responsive layout) and SPEC-011 (personalized greeting) previously completed. Pitch deck reviewed — 7 new features identified and specced (SPEC-011–017). All features use mock data per hackathon rules (no auth).*
