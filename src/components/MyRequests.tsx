@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { CSSProperties, useState } from "react";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
 import { ASSETS, JOB_SITES, type EquipmentRequest } from "@/lib/data";
@@ -9,6 +9,75 @@ import { StatusBadge, BackBtn, cardStyle } from "@/components/ui";
 interface MyRequestsProps {
   requests: EquipmentRequest[];
   onBack: () => void;
+}
+
+const TIMELINE_STEPS = [
+  { key: "submitted", label: "Submitted" },
+  { key: "review", label: "Under Review" },
+  { key: "approved", label: "Approved" },
+  { key: "transit", label: "In Transit" },
+  { key: "delivered", label: "Delivered" },
+];
+
+function getStepIndex(status: string): number {
+  switch (status) {
+    case "Pending": return 1;    // Under Review
+    case "Accepted": return 2;   // Approved
+    case "In Transit": return 3; // In Transit
+    default: return 0;           // Submitted (fallback)
+  }
+}
+
+function RequestTimeline({ status }: { status: string }) {
+  const currentIdx = getStepIndex(status);
+  const isMob = useBreakpoint() === "mobile";
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 0, margin: "14px 0 4px", width: "100%" }}>
+      {TIMELINE_STEPS.map((step, i) => {
+        const isCompleted = i < currentIdx;
+        const isCurrent = i === currentIdx;
+
+        const circleColor = isCompleted ? S.submitGreen
+          : isCurrent ? S.navy
+          : S.black20;
+        const lineColor = isCompleted ? S.submitGreen : S.black20;
+        const labelColor = isCompleted ? S.darkGreen
+          : isCurrent ? S.navy
+          : S.darkGray;
+
+        return (
+          <div key={step.key} style={{ display: "flex", alignItems: "center", flex: i < TIMELINE_STEPS.length - 1 ? 1 : "none" }}>
+            {/* Step circle + label */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: isMob ? 36 : 56 }}>
+              <div style={{
+                width: isCurrent ? 14 : 10,
+                height: isCurrent ? 14 : 10,
+                borderRadius: "50%",
+                backgroundColor: circleColor,
+                border: isCurrent ? `2px solid ${S.navy}` : "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}>
+                {isCompleted && (
+                  <span style={{ color: S.white, fontSize: 7, fontWeight: 700 }}>✓</span>
+                )}
+              </div>
+              <span style={{ fontSize: isMob ? 8 : 9, color: labelColor, fontWeight: isCurrent ? 700 : 400, marginTop: 4, textAlign: "center", whiteSpace: "nowrap" }}>
+                {step.label}
+              </span>
+            </div>
+            {/* Connecting line */}
+            {i < TIMELINE_STEPS.length - 1 && (
+              <div style={{ flex: 1, height: 2, backgroundColor: lineColor, marginTop: -14 /* Align with circles, not labels */ }} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function MyRequests({ requests, onBack }: MyRequestsProps) {
@@ -82,6 +151,9 @@ export default function MyRequests({ requests, onBack }: MyRequestsProps) {
                   <div style={{ fontSize: 12, color: S.black70, marginTop: 2 }}>
                     {job?.name} · {req.startDate} → {req.endDate}
                   </div>
+                  {req.status !== "Declined" && (
+                    <RequestTimeline status={req.status} />
+                  )}
                   {req.declineReason && (
                     <div
                       style={{
