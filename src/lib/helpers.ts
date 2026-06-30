@@ -1,4 +1,4 @@
-import { YARDS, JOB_SITES, ATTACHMENTS, OPERATORS, type Asset } from "./data";
+import { YARDS, JOB_SITES, ATTACHMENTS, OPERATORS, TRANSIT_MINUTES, type Asset } from "./data";
 
 export function getLocation(locId: string): string {
   const yard = YARDS.find((y) => y.id === locId);
@@ -32,6 +32,27 @@ export function getCompatibleAttachments(assetType: string) {
 export interface CertStatus {
   status: "valid" | "expired" | "missing" | "unknown" | "none";
   label: string;
+}
+
+export function getTransitEstimate(yardId: string, jobSiteId: string): string | null {
+  const minutes = TRANSIT_MINUTES[yardId]?.[jobSiteId];
+  if (!minutes) return null;
+  if (minutes < 60) return `~${minutes} min`;
+  const hrs = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return mins > 0 ? `~${hrs}h ${mins}m` : `~${hrs}h`;
+}
+
+export function getTransitRange(yardId: string): string | null {
+  const row = TRANSIT_MINUTES[yardId];
+  if (!row) return null;
+  const vals = Object.values(row);
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  if (min < 60 && max < 60) return `~${min}–${max} min`;
+  const fmtMin = min < 60 ? `${min} min` : `${Math.floor(min / 60)}h`;
+  const fmtMax = max < 60 ? `${max} min` : `${Math.floor(max / 60)}h`;
+  return `~${fmtMin}–${fmtMax}`;
 }
 
 export function getOperatorCertStatus(

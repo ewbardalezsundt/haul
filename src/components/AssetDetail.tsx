@@ -4,7 +4,7 @@ import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
 import type { Asset } from "@/lib/data";
 import { ASSETS } from "@/lib/data";
-import { getLocation, getCompatibleAttachments, getSubstitutes } from "@/lib/helpers";
+import { getLocation, getCompatibleAttachments, getSubstitutes, getTransitRange } from "@/lib/helpers";
 import { StatusBadge, Btn, BackBtn, SectionLabel, InfoRow, cardStyle } from "@/components/ui";
 
 interface AssetDetailProps {
@@ -86,6 +86,10 @@ export default function AssetDetail({ asset, onBack, onRequest, onSelectAsset }:
                 <InfoRow label="Ready Date" value={asset.readyDate} />
                 <InfoRow label="Internal Rate" value={`$${asset.rate.toLocaleString()}/wk`} />
                 <InfoRow label="Certification" value={asset.certRequired || "None"} />
+                {asset.location.startsWith("yard-") && (() => {
+                  const range = getTransitRange(asset.location);
+                  return range ? <InfoRow label="Est. Transit" value={`${range} depending on job site`} /> : null;
+                })()}
               </div>
               {compatible.length > 0 && (
                 <div style={{ marginTop: 20 }}>
@@ -121,7 +125,7 @@ export default function AssetDetail({ asset, onBack, onRequest, onSelectAsset }:
             }}
           >
             {asset.status === "Available" ? (
-              <Btn variant="brand" onClick={onRequest} style={{ padding: "12px 28px", fontSize: 14, width: isMobile ? "100%" : undefined, minHeight: 48, backgroundColor: S.green }}>
+              <Btn variant="submit" onClick={onRequest} style={{ padding: "12px 28px", fontSize: 14, width: isMobile ? "100%" : undefined, minHeight: 48 }}>
                 Request This Equipment →
               </Btn>
             ) : (

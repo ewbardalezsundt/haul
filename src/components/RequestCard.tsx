@@ -3,7 +3,7 @@
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
 import { ASSETS, ATTACHMENTS, DECLINE_REASONS, JOB_SITES, type EquipmentRequest } from "@/lib/data";
-import { getOperatorCertStatus } from "@/lib/helpers";
+import { getOperatorCertStatus, getLocation, getTransitEstimate } from "@/lib/helpers";
 import { StatusBadge, Btn, CertIndicator, cardStyle } from "@/components/ui";
 
 interface RequestCardProps {
@@ -20,6 +20,10 @@ export default function RequestCard({ req, onAccept, onDecline }: RequestCardPro
   const attNames = req.attachments
     .map((aId) => ATTACHMENTS.find((a) => a.id === aId)?.name)
     .filter(Boolean);
+
+  const transit = asset?.location.startsWith("yard-") && req.jobSiteId
+    ? getTransitEstimate(asset.location, req.jobSiteId)
+    : null;
 
   return (
     <div style={{ ...cardStyle, padding: isMobile ? 16 : 20 }}>
@@ -98,6 +102,12 @@ export default function RequestCard({ req, onAccept, onDecline }: RequestCardPro
                 {req.startDate} → {req.endDate}
               </span>
             </div>
+            {transit && (
+              <div>
+                <span style={{ color: S.darkGray }}>Transit: </span>
+                <span style={{ fontWeight: 600, color: S.black80 }}>{transit} from {getLocation(asset!.location)}</span>
+              </div>
+            )}
           </div>
           {attNames.length > 0 && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>

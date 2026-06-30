@@ -165,6 +165,15 @@ export const MOCK_USER = {
   jobSite: "I-10 Broadway Curve",
 };
 
+// ── Transit Time Matrix (yard → job site, in minutes) ────
+
+export const TRANSIT_MINUTES: Record<string, Record<string, number>> = {
+  "yard-1": { "job-1": 20, "job-2": 35, "job-3": 120, "job-4": 30, "job-5": 15 },
+  "yard-2": { "job-1": 120, "job-2": 130, "job-3": 15, "job-4": 115, "job-5": 125 },
+  "yard-3": { "job-1": 30, "job-2": 10, "job-3": 125, "job-4": 25, "job-5": 35 },
+  "yard-4": { "job-1": 25, "job-2": 30, "job-3": 115, "job-4": 10, "job-5": 20 },
+};
+
 // ── Filter categories ───────────────────────────────────
 
 export const CATEGORIES = [

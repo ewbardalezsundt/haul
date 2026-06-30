@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { S } from "@/lib/theme";
 import { certColors } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
 import { JOB_SITES, ATTACHMENTS, OPERATORS, type Asset, type EquipmentRequest } from "@/lib/data";
-import { getCompatibleAttachments, getOperatorCertStatus } from "@/lib/helpers";
+import { getCompatibleAttachments, getOperatorCertStatus, getTransitEstimate } from "@/lib/helpers";
 import { Btn, BackBtn, InfoRow, cardStyle, inputStyle, labelStyle } from "@/components/ui";
 
 interface OrderWizardProps {
@@ -326,6 +326,9 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
                 />
                 <InfoRow label="Dates" value={`${form.startDate} → ${form.endDate}`} />
                 <InfoRow label="Rate" value={`$${asset.rate.toLocaleString()}/wk`} />
+                {asset.location.startsWith("yard-") && form.jobSiteId && (
+                  <InfoRow label="Est. Transit" value={getTransitEstimate(asset.location, form.jobSiteId) || "N/A"} />
+                )}
                 {form.attachments.length > 0 && (
                   <InfoRow
                     label="Attachments"
