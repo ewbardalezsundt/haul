@@ -121,7 +121,7 @@ export default function AssetDetail({ asset, onBack, onRequest, onSelectAsset }:
             }}
           >
             {asset.status === "Available" ? (
-              <Btn variant="brand" onClick={onRequest} style={{ padding: "12px 28px", fontSize: 14, width: isMobile ? "100%" : undefined, minHeight: 48 }}>
+              <Btn variant="brand" onClick={onRequest} style={{ padding: "12px 28px", fontSize: 14, width: isMobile ? "100%" : undefined, minHeight: 48, backgroundColor: S.green }}>
                 Request This Equipment →
               </Btn>
             ) : (
