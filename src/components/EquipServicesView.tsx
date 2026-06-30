@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
-import { ASSETS, OPERATORS, DECLINE_REASONS, type EquipmentRequest } from "@/lib/data";
+import { ASSETS, OPERATORS, DECLINE_REASONS, UPCOMING_MAINTENANCE, type EquipmentRequest } from "@/lib/data";
 import { Btn, cardStyle, inputStyle } from "@/components/ui";
 import RequestCard from "@/components/RequestCard";
 import FleetOverview from "@/components/FleetOverview";
@@ -222,6 +222,62 @@ export default function EquipServicesView({
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Upcoming Maintenance (SPEC-016) */}
+      <div style={{ ...cardStyle, padding: isMobile ? 16 : 20, marginBottom: 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: S.black90 }}>Upcoming Maintenance</div>
+          <span style={{ fontSize: 11, fontWeight: 600, color: S.navy, cursor: "pointer" }}>View all</span>
+        </div>
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" as never }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+            <thead>
+              <tr style={{ borderBottom: `1px solid ${S.lightQdr}` }}>
+                <th style={{ textAlign: "left", padding: "8px 6px", fontWeight: 600, color: S.black70, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 }}>Equipment</th>
+                <th style={{ textAlign: "left", padding: "8px 6px", fontWeight: 600, color: S.black70, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 }}>Type</th>
+                <th style={{ textAlign: "left", padding: "8px 6px", fontWeight: 600, color: S.black70, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 }}>Due Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...UPCOMING_MAINTENANCE]
+                .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
+                .slice(0, 5)
+                .map((m) => {
+                  const asset = ASSETS.find((a) => a.id === m.assetId);
+                  const dueMs = new Date(m.dueDate + "T00:00:00").getTime();
+                  const demoMs = new Date(DEMO_TODAY + "T00:00:00").getTime();
+                  const daysUntil = (dueMs - demoMs) / 86400000;
+                  const isOverdue = daysUntil < 0;
+                  const isUrgent = !isOverdue && daysUntil <= 3;
+                  const rowBg = isOverdue ? S.black70 + "14" : isUrgent ? "#D4A01718" : "transparent";
+                  const dateFg = isOverdue ? S.black70 : isUrgent ? "#9A7B00" : S.black90;
+                  return (
+                    <tr key={m.assetId + m.dueDate} style={{ borderBottom: `1px solid ${S.lightQdr}`, backgroundColor: rowBg }}>
+                      <td style={{ padding: "10px 6px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          {asset?.photo && (
+                            <img
+                              src={asset.photo}
+                              alt={asset.name}
+                              style={{ width: 32, height: 32, borderRadius: 4, objectFit: "cover" }}
+                            />
+                          )}
+                          <span style={{ fontWeight: 600, color: S.black90, whiteSpace: "nowrap" }}>{asset?.name ?? m.assetId}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: "10px 6px", color: S.black80 }}>{m.type}</td>
+                      <td style={{ padding: "10px 6px", fontWeight: 600, color: dateFg, whiteSpace: "nowrap" }}>
+                        {new Date(m.dueDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        {isOverdue && <span style={{ fontSize: 10, fontWeight: 700, marginLeft: 6, color: S.black70 }}>OVERDUE</span>}
+                        {isUrgent && <span style={{ fontSize: 10, fontWeight: 700, marginLeft: 6, color: "#9A7B00" }}>SOON</span>}
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </table>
         </div>
       </div>
 
