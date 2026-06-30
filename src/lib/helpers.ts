@@ -1,4 +1,4 @@
-import { YARDS, JOB_SITES, ATTACHMENTS, OPERATORS } from "./data";
+import { YARDS, JOB_SITES, ATTACHMENTS, OPERATORS, type Asset } from "./data";
 
 export function getLocation(locId: string): string {
   const yard = YARDS.find((y) => y.id === locId);
@@ -6,6 +6,23 @@ export function getLocation(locId: string): string {
   const job = JOB_SITES.find((j) => j.id === locId);
   if (job) return job.name;
   return locId;
+}
+
+export function getSubstitutes(asset: Asset, allAssets: Asset[], maxResults = 3): Asset[] {
+  return allAssets
+    .filter(a =>
+      a.id !== asset.id &&          // Not the same asset
+      a.type === asset.type &&       // Same type
+      a.status === "Available"       // Must be available
+    )
+    .sort((a, b) => {
+      // Prefer same yard, then nearest yard, then by rate similarity
+      const aYardMatch = a.location === asset.location ? 0 : 1;
+      const bYardMatch = b.location === asset.location ? 0 : 1;
+      if (aYardMatch !== bYardMatch) return aYardMatch - bYardMatch;
+      return Math.abs(a.rate - asset.rate) - Math.abs(b.rate - asset.rate);
+    })
+    .slice(0, maxResults);
 }
 
 export function getCompatibleAttachments(assetType: string) {

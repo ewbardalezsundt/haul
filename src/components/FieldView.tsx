@@ -68,6 +68,7 @@ export default function FieldView({ requests, addRequest }: FieldViewProps) {
       <AssetDetail
         asset={selectedAsset}
         onBack={() => setSelectedAsset(null)}
+        onSelectAsset={setSelectedAsset}
         onRequest={() => {
           setOrderAsset(selectedAsset);
           setSelectedAsset(null);
