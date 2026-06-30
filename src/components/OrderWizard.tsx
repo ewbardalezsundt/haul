@@ -27,6 +27,11 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
     fuelFreq: "Weekly",
     operatorId: "",
     operatorRequested: false,
+    deliveryContact: "",
+    deliveryNotes: "",
+    deliveryDropZone: "",
+    siteHours: "",
+    unloadingSupport: false,
   });
 
   const compatible = getCompatibleAttachments(asset.type);
@@ -47,6 +52,11 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
       fuelFreq: form.fueling ? form.fuelFreq : null,
       operatorId: form.operatorId || null,
       operatorRequested: form.operatorRequested,
+      deliveryContact: form.deliveryContact || undefined,
+      deliveryNotes: form.deliveryNotes || undefined,
+      deliveryDropZone: form.deliveryDropZone || undefined,
+      siteHours: form.siteHours || undefined,
+      unloadingSupport: form.unloadingSupport || undefined,
     });
   };
 
@@ -190,6 +200,76 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
                     return <p style={{ fontSize: 11, marginTop: 4, fontWeight: 600, color: S.black70 }}>⚠ {cert.label}</p>;
                   return null;
                 })()}
+              </div>
+              <div style={{ borderTop: `1px solid ${S.qdrGray}`, paddingTop: 16, marginTop: 16 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: S.darkGray, marginBottom: 12 }}>Delivery Details (optional)</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div>
+                    <label style={labelStyle}>Delivery Contact</label>
+                    <input
+                      type="text"
+                      placeholder="Name and phone (e.g., John Smith, 480-555-1234)"
+                      value={form.deliveryContact}
+                      onChange={(e) => setForm({ ...form, deliveryContact: e.target.value })}
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Site Hours</label>
+                    <input
+                      type="text"
+                      placeholder="e.g., 6:00 AM – 4:30 PM"
+                      value={form.siteHours}
+                      onChange={(e) => setForm({ ...form, siteHours: e.target.value })}
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Drop Zone</label>
+                    <input
+                      type="text"
+                      placeholder="e.g., NE corner near trailer 3"
+                      value={form.deliveryDropZone}
+                      onChange={(e) => setForm({ ...form, deliveryDropZone: e.target.value })}
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Access / Gate Notes</label>
+                    <textarea
+                      placeholder="Gate codes, road restrictions, special instructions..."
+                      value={form.deliveryNotes}
+                      onChange={(e) => setForm({ ...form, deliveryNotes: e.target.value })}
+                      style={{
+                        ...inputStyle,
+                        fontFamily: "inherit",
+                        resize: "vertical",
+                        minHeight: 60,
+                      }}
+                    />
+                  </div>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: 12,
+                      border: `1px solid ${S.qdrGray}`,
+                      borderRadius: 8,
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={form.unloadingSupport}
+                      onChange={(e) => setForm({ ...form, unloadingSupport: e.target.checked })}
+                      style={{ accentColor: S.navy }}
+                    />
+                    <span style={{ fontSize: 13, fontWeight: 500, color: S.black80 }}>
+                      I need help unloading
+                    </span>
+                  </label>
+                </div>
               </div>
             </div>
           )}
@@ -371,6 +451,18 @@ export default function OrderWizard({ asset, onCancel, onSubmit }: OrderWizardPr
                     </div>
                   );
                 })()}
+                {(form.deliveryContact || form.deliveryNotes || form.deliveryDropZone || form.siteHours || form.unloadingSupport) && (
+                  <>
+                    <div style={{ borderTop: `1px solid ${S.qdrGray}`, marginTop: 12, paddingTop: 12 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: S.black70, marginBottom: 8 }}>📦 Delivery Details</div>
+                      {form.deliveryContact && <InfoRow label="Contact" value={form.deliveryContact} />}
+                      {form.siteHours && <InfoRow label="Site Hours" value={form.siteHours} />}
+                      {form.deliveryDropZone && <InfoRow label="Drop Zone" value={form.deliveryDropZone} />}
+                      {form.deliveryNotes && <InfoRow label="Access/Gate Notes" value={form.deliveryNotes} />}
+                      {form.unloadingSupport && <InfoRow label="Unloading Support" value="Yes — help needed" />}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}

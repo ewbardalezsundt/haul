@@ -61,6 +61,11 @@ export interface EquipmentRequest {
   submittedAt: string;
   declineReason?: string;
   declineReasonCode?: string;
+  deliveryContact?: string;
+  deliveryNotes?: string;
+  deliveryDropZone?: string;
+  siteHours?: string;
+  unloadingSupport?: boolean;
 }
 
 // ── Decline Reason Codes ────────────────────────────────

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { S } from "@/lib/theme";
 import { useBreakpoint } from "@/lib/useBreakpoint";
 import { ASSETS, ATTACHMENTS, DECLINE_REASONS, JOB_SITES, type EquipmentRequest } from "@/lib/data";
@@ -13,6 +14,7 @@ interface RequestCardProps {
 }
 
 export default function RequestCard({ req, onAccept, onDecline }: RequestCardProps) {
+  const [showDeliveryDetails, setShowDeliveryDetails] = useState(false);
   const isMobile = useBreakpoint() === "mobile";
   const asset = ASSETS.find((a) => a.id === req.assetId);
   const job = JOB_SITES.find((j) => j.id === req.jobSiteId);
@@ -20,6 +22,7 @@ export default function RequestCard({ req, onAccept, onDecline }: RequestCardPro
   const attNames = req.attachments
     .map((aId) => ATTACHMENTS.find((a) => a.id === aId)?.name)
     .filter(Boolean);
+  const hasDeliveryDetails = req.deliveryContact || req.deliveryNotes || req.deliveryDropZone || req.siteHours || req.unloadingSupport;
 
   const transit = asset?.location.startsWith("yard-") && req.jobSiteId
     ? getTransitEstimate(asset.location, req.jobSiteId)
@@ -150,6 +153,62 @@ export default function RequestCard({ req, onAccept, onDecline }: RequestCardPro
               )}
               {req.declineReasonCode && req.declineReason && " \u2014 "}
               {req.declineReason}
+            </div>
+          )}
+          {hasDeliveryDetails && (
+            <div style={{ marginTop: 12, borderTop: `1px solid ${S.qdrGray}`, paddingTop: 12 }}>
+              <button
+                onClick={() => setShowDeliveryDetails(!showDeliveryDetails)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: S.navy,
+                  padding: 0,
+                  margin: 0,
+                }}
+              >
+                📦 Delivery details {showDeliveryDetails ? "▼" : "▶"}
+              </button>
+              {showDeliveryDetails && (
+                <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6, fontSize: 12 }}>
+                  {req.deliveryContact && (
+                    <div>
+                      <span style={{ color: S.darkGray }}>Contact: </span>
+                      <span style={{ fontWeight: 500, color: S.black80 }}>{req.deliveryContact}</span>
+                    </div>
+                  )}
+                  {req.siteHours && (
+                    <div>
+                      <span style={{ color: S.darkGray }}>Hours: </span>
+                      <span style={{ fontWeight: 500, color: S.black80 }}>{req.siteHours}</span>
+                    </div>
+                  )}
+                  {req.deliveryDropZone && (
+                    <div>
+                      <span style={{ color: S.darkGray }}>Drop zone: </span>
+                      <span style={{ fontWeight: 500, color: S.black80 }}>{req.deliveryDropZone}</span>
+                    </div>
+                  )}
+                  {req.deliveryNotes && (
+                    <div>
+                      <span style={{ color: S.darkGray }}>Access/Gate: </span>
+                      <span style={{ fontWeight: 500, color: S.black80 }}>{req.deliveryNotes}</span>
+                    </div>
+                  )}
+                  {req.unloadingSupport && (
+                    <div>
+                      <span style={{ color: S.darkGray }}>Unloading support: </span>
+                      <span style={{ fontWeight: 500, color: S.darkGreen || "#2E7D32" }}>Yes</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
